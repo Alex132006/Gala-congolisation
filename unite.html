@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Bielleterie-ouverte</title>
+</head>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        position: relative;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url(image.png);
+        background-size: cover;
+        background-position: center;
+        filter: blur(2px) brightness(0.8);
+        z-index: -1;
+    }
+
+    /* Bouton info */
+    .info-button {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        border-radius: 30px;
+        backdrop-filter: blur(100px);
+        box-shadow: 0 0 10px #000000;
+        color: #ffffff;
+        border: 1px solid white;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        z-index: 1000;
+        text-decoration: none;
+    }
+
+    .info-button:hover {
+        transform: translateX(2px);
+        background: rgba(255, 255, 255, 0.197);
+        box-shadow: none;
+    }
+
+    /* Logos responsive */
+    .logo {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 100px;
+        height: auto;
+        z-index: 999;
+        border-radius: 50%;
+        padding: 3px;
+        mix-blend-mode: multiply;
+        background: linear-gradient(to right, #ff000000, #ffffff00);
+        z-index: 1000;
+    }
+
+    .logo2 {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 100px;
+        height: auto;
+        z-index: 999;
+        border-radius: 50%;
+        padding: 3px;
+        mix-blend-mode: multiply;
+        background: linear-gradient(to right, #ffffff44, #ffffffac);
+    }
+
+    /* Section principale */
+    .billet {
+        text-align: center;
+        padding: 20px;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        margin-bottom: 10vh;
+    }
+
+    .ligne {
+        border-bottom: 1px solid #ff0000;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .billet h1 {
+        font-family: "Mea Culpa", cursive;
+        font-weight: bold;
+        font-style: normal;
+        font-size: clamp(40px, 10vw, 80px);
+        margin-bottom: 20px;
+    }
+
+    .user {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        z-index: 1;
+        margin-top: 30px;
+        width: 100%;
+        max-width: 500px;
+        padding: 0 20px;
+    }
+
+    .users {
+        background: #00000046;
+        width: 100%;
+        max-width: 300px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid #ffffff;
+        box-shadow: 0 0 10px #000000;
+        color: #ffffff;
+        font-size: 16px;
+        text-align: center;
+        padding: 0 15px;
+    }
+
+    .users::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .use-btn {
+        margin-top: 10px;
+    }
+
+    .users-btn {
+        width: 130px;
+        height: 40px;
+        background: #a4a2a25d;
+        border-radius: 10px;
+        border: 1px solid #f3f3f3;
+        color: #ffffff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .users-btn:hover {
+        background: rgba(164, 162, 162, 0.8);
+        transform: scale(1.05);
+    }
+
+    /* Social media buttons wrapper */
+    .wrapper {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    /* Social buttons list */
+    .wrapper ul {
+        display: flex;
+        gap: 10px;
+        list-style: none;
+        padding: 0 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Individual social icon button */
+    .wrapper .icon {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        box-shadow: 0 15px 35px rgb(0, 0, 0);
+        border: 1px solid rgba(255, 255, 255, 0.288);
+    }
+
+    /* Social icon font styling */
+    .wrapper .icon i {
+        font-size: 18px;
+        color: white;
+    }
+
+    /* Social icon hover animation */
+    .wrapper .icon:hover {
+        transform: scale(1.2);
+    }
+
+    /* Social icon hover colors */
+    .wrapper .facebook:hover {
+        background: #1d7df2;
+    }
+
+    .wrapper .twitter:hover {
+        background: #24a1de;
+    }
+
+    .wrapper .youtube:hover {
+        background: #cd201f;
+    }
+
+    .wrapper .whatsapp:hover {
+        background: rgb(47, 183, 47);
+    }
+
+    .wrapper .telephone:hover {
+        background: #333;
+    }
+
+    .wrapper .mail:hover {
+        background: #d71919;
+    }
+
+    .wrapper .telegram:hover {
+        background: #2aabee;
+    }
+
+    /* Footer text */
+    .edition {
+        margin-top: 30px;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        text-align: center;
+        position: relative;
+        width: 100%;
+        padding: 0 20px;
+    }
+
+    /* --- Styles de la Modale --- */
+    .modal-target {
+        display: none;
+    }
+
+    /* Affiche la modale lorsque son ID est ciblé par l'URL */
+    #modal-info-opened:target {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.334);
+        backdrop-filter: blur(10px);
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background-color: #00000074;
+        padding: 25px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        color: rgb(255, 255, 255);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 45px;
+        text-decoration: none;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #ffffff;
+        color: #ffffff;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .close-btn:hover {
+        color: #000;
+    }
+
+    .modal-content h3 {
+        margin-bottom: 15px;
+        font-size: clamp(20px, 5vw, 24px);
+    }
+
+    .modal-content ul {
+        text-align: left;
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    .modal-content li {
+        margin-bottom: 10px;
+        font-size: clamp(14px, 3vw, 16px);
+    }
+
+    /* Media Queries pour différents écrans */
+    @media (min-width: 768px) {
+
+        .logo,
+        .logo2 {
+            width: 120px;
+            top: 30px;
+        }
+
+        .logo {
+            right: 30px;
+        }
+
+        .logo2 {
+            left: 30px;
+        }
+
+        .info-button {
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        .billet h1 {
+            margin-bottom: 40px;
+        }
+
+        .user {
+            margin-top: 50px;
+        }
+
+        .users {
+            width: 350px;
+            font-size: 18px;
+        }
+
+        .wrapper .icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .wrapper .icon i {
+            font-size: 22px;
+        }
+    }
+
+    @media (min-width: 1024px) {
+
+        .logo,
+        .logo2 {
+            width: 150px;
+            top: 50px;
+        }
+
+        .logo {
+            right: 50px;
+        }
+
+        .logo2 {
+            left: 50px;
+        }
+
+        .billet h1 {
+            font-size: 80px;
+        }
+
+        .user {
+            gap: 25px;
+        }
+
+        .users {
+            width: 400px;
+            height: 45px;
+            font-size: 20px;
+        }
+
+        .users-btn {
+            width: 150px;
+            height: 45px;
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+
+        .logo,
+        .logo2 {
+            width: 80px;
+            top: 10px;
+        }
+
+        .logo {
+            right: 10px;
+        }
+
+        .logo2 {
+            left: 10px;
+        }
+
+        .info-button {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+            top: 5px;
+            right: 5px;
+        }
+
+        .billet {
+            padding: 10px;
+            min-height: 70vh;
+        }
+
+        .billet h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .ligne {
+            max-width: 200px;
+        }
+
+        .user {
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        .users {
+            height: 35px;
+            font-size: 14px;
+            max-width: 250px;
+        }
+
+        .users-btn {
+            width: 120px;
+            height: 35px;
+            font-size: 14px;
+        }
+
+        .wrapper .icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .wrapper .icon i {
+            font-size: 16px;
+        }
+
+        .wrapper ul {
+            gap: 8px;
+        }
+    }
+
+    @media (max-width: 320px) {
+
+        .logo,
+        .logo2 {
+            width: 60px;
+        }
+
+        .billet h1 {
+            font-size: 32px;
+        }
+
+        .ligne {
+            max-width: 180px;
+        }
+
+        .user {
+            gap: 12px;
+        }
+
+        .users {
+            max-width: 220px;
+            height: 32px;
+            font-size: 12px;
+        }
+
+        .users-btn {
+            width: 100px;
+            height: 32px;
+            font-size: 12px;
+        }
+
+        .wrapper .icon {
+            width: 35px;
+            height: 35px;
+        }
+
+        .wrapper .icon i {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<body>
+
+    <img src="logo.jpg" class="logo" alt="Logo">
+    <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
+
+    <div class="billet">
+        <h1 class="ligne">Unite</h1>
+
+        <div class="user">
+            <input type="text" class="users" name="user" placeholder="Entrez votre nom" id="user">
+            <input type="email" class="users" name="user" placeholder="Entrez votre e-mail" id="email">
+            <input type="number" class="users" name="user" placeholder="Entrez votre numero" id="phone">
+            <div class="use-btn">
+                <input type="button" class="users-btn" value="Entrer">
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <ul>
+            <li class="icon whatsapp">
+                <a href="https://wa.me/" aria-label="WhatsApp" rel="noopener noreferrer" target="_blank">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
+            </li>
+
+            <li class="icon telegram">
+                <a href="https://t.me/+" aria-label="Telegram" rel="noopener noreferrer" target="_blank">
+                    <i class="fa-brands fa-telegram"></i>
+                </a>
+            </li>
+
+            <li class="icon telephone">
+                <a href="tel:+" aria-label="Téléphone" rel="noopener">
+                    <i class="fa fa-phone" aria-hidden="true"></i>
+                </a>
+            </li>
+
+            <li class="icon facebook">
+                <a href="" aria-label="Facebook" rel="noopener noreferrer" target="_blank">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+            </li>
+
+            <li class="icon youtube">
+                <a href="" aria-label="YouTube" rel="noopener noreferrer" target="_blank">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</body>
+
+</html>
