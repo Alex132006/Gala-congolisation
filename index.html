@@ -4,14 +4,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Bielleterie-ouverte</title>
 </head>
 
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        position: relative;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url(image.png);
+        background-size: cover;
+        background-position: center;
+        filter: blur(8px) brightness(0.8);
+        z-index: -1;
+    }
+
+    /* Bouton info */
+    .info-button {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        border-radius: 30px;
+        backdrop-filter: blur(100px);
+        box-shadow: 0 0 10px #000000;
+        color: #ffffff;
+        border: 1px solid white;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        z-index: 1000;
+        text-decoration: none;
+    }
+
+    .info-button:hover {
+        transform: translateX(2px);
+        background: rgba(255, 255, 255, 0.197);
+        box-shadow: none;
+    }
+
+    /* Logos responsive */
+    .logo {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 100px;
+        height: auto;
+        z-index: 999;
+        border-radius: 50%;
+        padding: 3px;
+        mix-blend-mode: multiply;
+        background: linear-gradient(to right, #ffffff, #ffffff);
+        z-index: 1000;
+    }
+
+    .logo2 {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 100px;
+        height: auto;
+        z-index: 999;
+        border-radius: 50%;
+        padding: 3px;
+        mix-blend-mode: multiply;
+        background: linear-gradient(to right, #ffffff44, #ffffffac);
+    }
+
+    /* Section principale */
+    .billet {
+        text-align: center;
+        padding: 20px;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin-top: 0;
+    }
+
+    .billet h1 {
+        font-family: "Mea Culpa", cursive;
+        font-weight: bold;
+        font-style: normal;
+        font-size: clamp(40px, 10vw, 80px);
+        margin-bottom: 20px;
+    }
+
+    .billet h2 {
+        font-size: clamp(16px, 4vw, 24px);
+        margin-bottom: 40px;
+        max-width: 600px;
+        line-height: 1.4;
+    }
+
+    /* Boutons */
+    .buttons-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .btn {
+        width: 100%;
+        max-width: 280px;
+        height: 70px;
+        border-radius: 30px;
+        backdrop-filter: blur(100px);
+        box-shadow: 0 0 10px #ffffff6e;
+        border: 1px solid #ffffff;
+        background: #fffdfd00;
+        color: #cc9f9f;
+        font-weight: bold;
+        font-size: clamp(20px, 5vw, 30px);
+        font-family: cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        transform: translateX(5px);
+        border: 1px solid #cbacac;
+        background: #fffdfd24;
+    }
+
+    /* Sponsor */
+    .sponsor {
+        border: 2px solid #ff00ae00;
+        border-radius: 50px;
+        background-color: #00000000;
+        backdrop-filter: blur(500px);
+        display: flex;
+        overflow: hidden;
+        width: 90%;
+        max-width: 1200px;
+        box-sizing: border-box;
+        position: relative;
+        bottom: 180px;
+        mix-blend-mode: multiply;
+        height: 80px;
+        margin: 20px auto;
+        z-index: 10000;
+    }
+
+    .sponsor-track {
+        display: flex;
+        animation: scroll 15s linear infinite;
+        width: fit-content;
+    }
+
+    .sponsors {
+        width: 60px;
+        height: auto;
+        border-radius: 50%;
+        mix-blend-mode: multiply;
+        margin: 0 15px;
+    }
+
+    @keyframes scroll {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    .sponsor:hover .sponsor-track {
+        animation-play-state: paused;
+    }
+
+    /* Social media buttons wrapper */
+    .wrapper {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    /* Social buttons list */
+    .wrapper ul {
+        display: flex;
+        gap: 10px;
+        list-style: none;
+        padding: 0 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Individual social icon button */
+    .wrapper .icon {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        box-shadow: 0 15px 35px rgb(0, 0, 0);
+        border: 1px solid rgba(255, 255, 255, 0.288);
+    }
+
+    /* Social icon font styling */
+    .wrapper .icon i {
+        font-size: 18px;
+        color: white;
+    }
+
+    /* Social icon hover animation */
+    .wrapper .icon:hover {
+        transform: scale(1.2);
+    }
+
+    /* Social icon hover colors */
+    .wrapper .facebook:hover {
+        background: #1d7df2;
+    }
+
+    .wrapper .twitter:hover {
+        background: #24a1de;
+    }
+
+    .wrapper .youtube:hover {
+        background: #cd201f;
+    }
+
+    .wrapper .whatsapp:hover {
+        background: rgb(47, 183, 47);
+    }
+
+    .wrapper .telephone:hover {
+        background: #333;
+    }
+
+    .wrapper .mail:hover {
+        background: #d71919;
+    }
+
+    .wrapper .telegram:hover {
+        background: #2aabee;
+    }
+
+    /* Footer text */
+    .edition {
+        margin-top: 30px;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        text-align: center;
+        position: relative;
+        width: 100%;
+        padding: 0 20px;
+    }
+
+    /* --- Styles de la Modale --- */
+    .modal-target {
+        display: none;
+    }
+
+    /* Affiche la modale lorsque son ID est ciblé par l'URL */
+    #modal-info-opened:target {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        padding: 25px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        color: black;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        text-decoration: none;
+        color: #333;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .close-btn:hover {
+        color: #000;
+    }
+
+    .modal-content h3 {
+        margin-bottom: 15px;
+        font-size: clamp(20px, 5vw, 24px);
+    }
+
+    .modal-content ul {
+        text-align: left;
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    .modal-content li {
+        margin-bottom: 10px;
+        font-size: clamp(14px, 3vw, 16px);
+    }
+
+    /* Media Queries pour différents écrans */
+    @media (min-width: 768px) {
+
+        .logo,
+        .logo2 {
+            width: 120px;
+            top: 30px;
+        }
+
+        .logo {
+            right: 30px;
+        }
+
+        .logo2 {
+            left: 30px;
+        }
+
+        .info-button {
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        .buttons-container {
+            flex-direction: row;
+            justify-content: center;
+            max-width: 600px;
+        }
+
+        .btn {
+            width: 250px;
+        }
+
+        .sponsors {
+            width: 70px;
+        }
+
+        .wrapper .icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .wrapper .icon i {
+            font-size: 22px;
+        }
+    }
+
+    @media (min-width: 1024px) {
+
+        .logo,
+        .logo2 {
+            width: 150px;
+            top: 50px;
+        }
+
+        .logo {
+            right: 50px;
+        }
+
+        .logo2 {
+            left: 50px;
+        }
+
+        .billet h1 {
+            font-size: 80px;
+        }
+
+        .billet h2 {
+            font-size: 28px;
+        }
+
+        .buttons-container {
+            gap: 40px;
+        }
+
+        .sponsors {
+            width: 80px;
+        }
+    }
+
+    @media (max-width: 480px) {
+
+        .logo,
+        .logo2 {
+            width: 80px;
+            top: 10px;
+        }
+
+        .logo {
+            right: 10px;
+        }
+
+        .logo2 {
+            left: 10px;
+        }
+
+        .info-button {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+            top: 5px;
+            right: 5px;
+        }
+
+        .billet {
+            padding: 10px;
+        }
+
+        .billet h1 {
+            font-size: 36px;
+        }
+
+        .billet h2 {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            height: 60px;
+            font-size: 18px;
+        }
+
+        .sponsors {
+            width: 50px;
+            margin: 0 10px;
+        }
+
+        .wrapper .icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .wrapper .icon i {
+            font-size: 16px;
+        }
+
+        .wrapper ul {
+            gap: 8px;
+        }
+    }
+
+    @media (max-width: 320px) {
+
+        .logo,
+        .logo2 {
+            width: 60px;
+        }
+
+        .billet h1 {
+            font-size: 32px;
+        }
+
+        .billet h2 {
+            font-size: 14px;
+        }
+
+        .btn {
+            height: 55px;
+            font-size: 16px;
+        }
+
+        .wrapper .icon {
+            width: 35px;
+            height: 35px;
+        }
+    }
+</style>
+
 <body>
-    <div>
-        <h2>Theme:
-            <h2>Congolisation</h2>
-        </h2>
+
+    <img src="logo.jpg" class="logo" alt="Logo">
+    <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
+
+    <div class="billet">
+        <h1>Bielleterie ouverte</h1>
+        <h2>bienvenue sur la plateforme de vente de biellet du Gala</h2>
+
+        <div class="buttons-container">
+            <a href="#-info-opened" class="btn" aria-label="Acheter un billet">Achat</a>
+            <a href="#modal-info-opened" class="btn" aria-label="Plus d'informations">Infos</a>
+        </div>
+    </div>
+
+    <!-- La Modale (cachée par défaut) -->
+    <div id="modal-info-opened" class="modal-target">
+        <div class="modal-content">
+            <a href="#" class="close-btn" aria-label="Fermer la modale">&times;</a>
+            <h3>Informations Importantes</h3>
+            <p>Voici toutes les informations concernant l'événement :</p>
+            <ul>
+                <li>Date : 24 Novembre 2025</li>
+                <li>Lieu : Paris</li>
+                <li>Prix : 20€</li>
+                <li>Heure : 20h00 - 04h00</li>
+                <li>Dress code : Élégant</li>
+            </ul>
+            <p>Pour toute question, n'hésitez pas à nous contacter via nos réseaux sociaux.</p>
+
+            <div class="wrapper">
+                <ul>
+                    <li class="icon whatsapp">
+                        <a href="https://wa.me/79082959314" aria-label="WhatsApp" rel="noopener noreferrer"
+                            target="_blank">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                    </li>
+
+                    <li class="icon telegram">
+                        <a href="https://t.me/+79009849105" aria-label="Telegram" rel="noopener noreferrer"
+                            target="_blank">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                    </li>
+
+                    <li class="icon telephone">
+                        <a href="tel:+79082959314" aria-label="Téléphone" rel="noopener">
+                            <i class="fa fa-phone" aria-hidden="true"></i>
+                        </a>
+                    </li>
+
+                    <li class="icon facebook">
+                        <a href="https://www.facebook.com/Aesgfr.me?mibextid=wwXIfr" aria-label="Facebook"
+                            rel="noopener noreferrer" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                    </li>
+
+                    <li class="icon youtube">
+                        <a href="https://youtube.com/@aesgfrgabonrussie?si=-Wi2OELsDH9kQ0Yc" aria-label="YouTube"
+                            rel="noopener noreferrer" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="sponsor">
+        <div class="sponsor-track">
+            <img src="logo.jpg" class="sponsors" alt="Sponsor 1">
+            <img src="logo2.jpg" class="sponsors" alt="Sponsor 2">
+            <img src="logo.jpg" class="sponsors" alt="Sponsor 3">
+            <img src="logo2.jpg" class="sponsors" alt="Sponsor 4">
+            <img src="logo.jpg" class="sponsors" alt="Sponsor 5">
+            <img src="logo.jpg" class="sponsors" alt="Sponsor 1 (copie)">
+            <img src="logo2.jpg" class="sponsors" alt="Sponsor 2 (copie)">
+            <img src="logo.jpg" class="sponsors" alt="Sponsor 3 (copie)">
+            <img src="logo2.jpg" class="sponsors" alt="Sponsor 4 (copie)">
+            <img src="logo.jpg" class="sponsors" alt="Sponsor 5 (copie)">
+        </div>
     </div>
 </body>
 
