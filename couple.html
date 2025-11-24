@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
@@ -34,7 +34,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url(image\ copy\ 2.png);
+        background-image: url(image\ copy\ 3.png);
         background-size: cover;
         background-position: center;
         filter: blur(2px) brightness(0.8);
@@ -126,7 +126,26 @@
         margin-bottom: 20px;
     }
 
+    .billet h3 {
+        margin: 20px 0 10px;
+        font-size: clamp(16px, 4vw, 20px);
+        color: rgba(255, 255, 255, 0.9);
+    }
+
     .user {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        z-index: 1;
+        margin-top: 30px;
+        width: 100%;
+        max-width: 500px;
+        padding: 0 20px;
+    }
+
+    .user-data {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -158,7 +177,7 @@
     }
 
     .use-btn {
-        margin-top: 10px;
+        margin-top: 20px;
     }
 
     .users-btn {
@@ -453,6 +472,10 @@
             margin-bottom: 15px;
         }
 
+        .billet h3 {
+            margin: 15px 0 8px;
+        }
+
         .ligne {
             max-width: 200px;
         }
@@ -499,6 +522,10 @@
             font-size: 32px;
         }
 
+        .billet h3 {
+            font-size: 14px;
+        }
+
         .ligne {
             max-width: 180px;
         }
@@ -536,12 +563,17 @@
     <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
 
     <div class="billet">
-        <h1 class="ligne">Unite</h1>
+        <h1 class="ligne">Couple</h1>
 
         <div class="user">
-            <input type="text" class="users" name="user" placeholder="Entrez votre nom" id="user">
-            <input type="email" class="users" name="user" placeholder="Entrez votre e-mail" id="email">
-            <input type="number" class="users" name="user" placeholder="Entrez votre numero" id="phone">
+            <input type="text" class="users" name="user1" placeholder="Entrez votre nom" id="user1">
+            <input type="text" class="users" name="user2" placeholder="Nom de votre partenaire" id="user2">
+        </div>
+
+        <h3>Votre mail</h3>
+        <div class="user-data">
+            <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email">
+            <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone">
             <div class="use-btn">
                 <input type="button" class="users-btn" value="Entrer">
             </div>
