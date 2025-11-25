@@ -12,21 +12,50 @@
     <title>Connexion Admin</title>
     <style>
         body {
-            background: #1a1a1a;
+            background-image: url(logo2.jpg);
+
+            object-fit: cover;
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(logo2.jpg);
+            background-size: cover;
+            background-position: center;
+            filter: blur(2px) brightness(0.8);
+            z-index: -1;
+        }
+
+        .logo2 {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: auto;
+            z-index: 999;
+            border-radius: 50%;
+            padding: 3px;
+            mix-blend-mode: multiply;
+            background: linear-gradient(to right, #ffffff44, #ffffffac);
         }
 
         .login-container {
-            background: #2d2d2d;
+            background: #00000046;
+            backdrop-filter: blur(10px);
             padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border-radius: 50px;
+            box-shadow: 0 0 20px rgb(0, 0, 0);
             width: 100%;
             max-width: 400px;
         }
@@ -34,7 +63,8 @@
         h1 {
             text-align: center;
             margin-bottom: 30px;
-            color: #ff6b6b;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .form-group {
@@ -44,21 +74,23 @@
         label {
             display: block;
             margin-bottom: 5px;
+            text-align: center;
         }
 
         input {
-            width: 100%;
+            width: 60%;
             padding: 10px;
-            background: #3d3d3d;
-            border: 1px solid #444;
+            min-width: 95%;
+            background: #00d5ff3c;
+            border: 1px solid #ffffff;
             border-radius: 5px;
-            color: white;
+            color: rgb(255, 255, 255);
         }
 
         button {
-            width: 100%;
+            width: 30%;
             padding: 12px;
-            background: #ff6b6b;
+            background: #0707075a;
             color: white;
             border: none;
             border-radius: 5px;
@@ -67,7 +99,7 @@
         }
 
         button:hover {
-            background: #ff5252;
+            background: #2525254a;
         }
 
         .error {
@@ -81,12 +113,14 @@
             text-align: center;
             margin-top: 20px;
             font-size: 0.8em;
-            color: #888;
+            color: #000000;
         }
     </style>
 </head>
 
 <body>
+    <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
+
     <div class="login-container">
         <h1>🔐 Connexion Admin</h1>
         <form id="loginForm">
@@ -102,7 +136,7 @@
             <div class="error" id="errorMessage">Identifiants incorrects</div>
         </form>
         <div class="security-notice">
-            ⚠️ Accès réservé au personnel autorisé
+            ⚠️ Accès au personnel
         </div>
     </div>
 
@@ -127,7 +161,7 @@
 
         function attemptLogin(username, password) {
             const validUsername = 'Audace';
-            const validPassword = 'Bielle2024!';
+            const validPassword = '@Alex.1320';
 
             if (username === validUsername && password === validPassword) {
                 localStorage.setItem('adminAuthenticated', 'true');
