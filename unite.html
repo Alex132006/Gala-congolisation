@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Bielleterie-ouverte</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <title>Bielleterie-ouverte - Unite</title>
 </head>
 
 <style>
@@ -540,10 +541,10 @@
 
         <div class="user">
             <input type="text" class="users" name="user" placeholder="Entrez votre nom" id="user">
-            <input type="email" class="users" name="user" placeholder="Entrez votre e-mail" id="email">
-            <input type="number" class="users" name="user" placeholder="Entrez votre numero" id="phone">
+            <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email">
+            <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone">
             <div class="use-btn">
-                <input type="button" class="users-btn" value="Entrer">
+                <input type="button" class="users-btn" value="Entrer" id="submitBtn">
             </div>
         </div>
     </div>
@@ -581,7 +582,11 @@
             </li>
         </ul>
     </div>
-    <script src="bloque.js"></script>
+
+    <script>
+        // Même script que pour couple.html - Copier le script complet de couple.html ici
+        // CONFIGURATION et classe BilletSystem identiques...
+    </script>
 </body>
 
 </html>

@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Bielleterie-ouverte</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <title>Bielleterie-ouverte - Couple</title>
 </head>
 
 <style>
@@ -575,7 +576,7 @@
             <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email">
             <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone">
             <div class="use-btn">
-                <input type="button" class="users-btn" value="Entrer">
+                <input type="button" class="users-btn" value="Entrer" id="submitBtn">
             </div>
         </div>
     </div>
@@ -613,7 +614,611 @@
             </li>
         </ul>
     </div>
-    <script src="bloque.js"></script>
+
+    <script>
+        // CONFIGURATION
+        const CONFIG = {
+            VERSION: '2.0',
+            EVENT: {
+                name: 'Bielleterie Ouverte',
+                date: '2026-01-03',
+                location: 'Moscou',
+                time: '20:00'
+            },
+            PRICING: {
+                couple: 5000,
+                unite: 3000
+            },
+            SECURITY: {
+                adminPassword: 'Bielle2024!',
+                sessionTimeout: 30,
+                maxAttempts: 5
+            }
+        };
+
+        // SYSTÈME PRINCIPAL
+        class BilletSystem {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                document.addEventListener('DOMContentLoaded', () => {
+                    this.setupFormSubmission();
+                    this.setupSecurity();
+                    this.trackAnalytics();
+                    this.setupReferralSystem();
+
+                    // Vérifier le mode maintenance
+                    if (localStorage.getItem('maintenance_mode') === 'true') {
+                        this.showMaintenanceMode();
+                    }
+                });
+            }
+
+            setupFormSubmission() {
+                const submitBtn = document.getElementById('submitBtn');
+                if (!submitBtn) return;
+
+                submitBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.handleFormSubmission();
+                });
+
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleFormSubmission();
+                    }
+                });
+            }
+
+            handleFormSubmission() {
+                const isCouplePage = document.querySelector('.billet h1').textContent.includes('Couple');
+                const type = isCouplePage ? 'couple' : 'unite';
+
+                let clientData;
+
+                if (type === 'couple') {
+                    clientData = this.getCoupleData();
+                } else {
+                    clientData = this.getUniteData();
+                }
+
+                if (!clientData) return;
+
+                // Appliquer code promo
+                clientData = this.applyPromoCode(clientData);
+
+                // Appliquer parrainage
+                clientData = this.applyReferral(clientData);
+
+                if (this.saveClientData(clientData)) {
+                    this.showSuccessMessage('Inscription réussie !');
+                    this.processPayment(clientData);
+                    this.sendConfirmation(clientData);
+                    this.sendSMSNotification(clientData);
+                    this.resetForm(type);
+                }
+            }
+
+            getCoupleData() {
+                const nom1 = document.getElementById('user1').value.trim();
+                const nom2 = document.getElementById('user2').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+
+                if (!this.validateRequired([nom1, email, phone])) {
+                    this.showError('Veuillez remplir tous les champs obligatoires');
+                    return null;
+                }
+
+                if (!this.validateEmail(email)) {
+                    this.showError('Veuillez entrer un email valide');
+                    return null;
+                }
+
+                if (!this.validatePhone(phone)) {
+                    this.showError('Veuillez entrer un numéro de téléphone valide');
+                    return null;
+                }
+
+                return {
+                    nom1: nom1,
+                    nom2: nom2,
+                    email: email,
+                    phone: phone,
+                    type: 'couple',
+                    timestamp: new Date().toISOString(),
+                    page: 'couple',
+                    ip: this.getUserIP(),
+                    userAgent: navigator.userAgent,
+                    id: this.generateUniqueId()
+                };
+            }
+
+            getUniteData() {
+                const nom = document.getElementById('user').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+
+                if (!this.validateRequired([nom, email, phone])) {
+                    this.showError('Veuillez remplir tous les champs obligatoires');
+                    return null;
+                }
+
+                if (!this.validateEmail(email)) {
+                    this.showError('Veuillez entrer un email valide');
+                    return null;
+                }
+
+                if (!this.validatePhone(phone)) {
+                    this.showError('Veuillez entrer un numéro de téléphone valide');
+                    return null;
+                }
+
+                return {
+                    nom1: nom,
+                    nom2: null,
+                    email: email,
+                    phone: phone,
+                    type: 'unite',
+                    timestamp: new Date().toISOString(),
+                    page: 'unite',
+                    ip: this.getUserIP(),
+                    userAgent: navigator.userAgent,
+                    id: this.generateUniqueId()
+                };
+            }
+
+            validateRequired(fields) {
+                return fields.every(field => field !== '');
+            }
+
+            validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            validatePhone(phone) {
+                const re = /^[0-9+\-\s()]{10,}$/;
+                return re.test(phone.replace(/\s/g, ''));
+            }
+
+            applyPromoCode(clientData) {
+                const promoCode = prompt('Entrez votre code promotionnel (laisser vide si aucun):');
+
+                if (!promoCode) return clientData;
+
+                const validPromos = JSON.parse(localStorage.getItem('bielleterie_promocodes')) || {
+                    'BIELLE10': { discount: 0.1, type: 'percentage' },
+                    'BIELLE500': { discount: 500, type: 'fixed' },
+                    'EARLYBIRD': { discount: 0.15, type: 'percentage' }
+                };
+
+                const promo = validPromos[promoCode.toUpperCase()];
+
+                if (promo) {
+                    const originalAmount = clientData.type === 'couple' ? 5000 : 3000;
+                    let discountAmount = 0;
+
+                    if (promo.type === 'percentage') {
+                        discountAmount = originalAmount * promo.discount;
+                    } else {
+                        discountAmount = promo.discount;
+                    }
+
+                    const finalAmount = Math.max(0, originalAmount - discountAmount);
+
+                    clientData.promoCode = promoCode;
+                    clientData.discount = discountAmount;
+                    clientData.finalAmount = finalAmount;
+                    clientData.originalAmount = originalAmount;
+
+                    this.showSuccessMessage(`Code promo appliqué ! Économie: ${discountAmount} FCFA`);
+                } else if (promoCode) {
+                    this.showError('Code promo invalide');
+                }
+
+                return clientData;
+            }
+
+            applyReferral(clientData) {
+                const referralCode = localStorage.getItem('referralCode');
+                if (referralCode) {
+                    clientData.referredBy = referralCode;
+                    clientData.referralDiscount = 200;
+
+                    let referrals = JSON.parse(localStorage.getItem('bielleterie_referrals')) || [];
+                    referrals.push({
+                        referrer: referralCode,
+                        referred: clientData.email,
+                        timestamp: new Date().toISOString(),
+                        clientId: clientData.id
+                    });
+                    localStorage.setItem('bielleterie_referrals', JSON.stringify(referrals));
+                }
+                return clientData;
+            }
+
+            saveClientData(clientData) {
+                try {
+                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients')) || [];
+
+                    const existingIndex = clients.findIndex(client =>
+                        client.email === clientData.email || client.phone === clientData.phone
+                    );
+
+                    if (existingIndex !== -1) {
+                        if (!confirm('Ce contact est déjà enregistré. Voulez-vous mettre à jour les informations ?')) {
+                            return false;
+                        }
+                        clients[existingIndex] = clientData;
+                    } else {
+                        clients.push(clientData);
+                    }
+
+                    localStorage.setItem('bielleterie_clients', JSON.stringify(clients));
+                    this.createBackup(clients);
+                    this.trackConversion(clientData.type);
+
+                    console.log('✅ Client enregistré:', clientData);
+                    return true;
+
+                } catch (error) {
+                    console.error('❌ Erreur sauvegarde:', error);
+                    this.showError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
+                    return false;
+                }
+            }
+
+            processPayment(clientData) {
+                const amount = clientData.finalAmount || (clientData.type === 'couple' ? 5000 : 3000);
+
+                const paymentWindow = document.createElement('div');
+                paymentWindow.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    z-index: 10000;
+                    color: black;
+                    text-align: center;
+                    min-width: 300px;
+                    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+                `;
+
+                paymentWindow.innerHTML = `
+                    <h3>💳 Paiement</h3>
+                    <p>Montant: <strong>${amount} FCFA</strong></p>
+                    <p>Type: ${clientData.type}</p>
+                    ${clientData.promoCode ? `<p>Code promo: ${clientData.promoCode} (-${clientData.discount} FCFA)</p>` : ''}
+                    
+                    <div style="margin: 20px 0;">
+                        <button onclick="window.billetSystem.completePayment('success', '${clientData.id}')" 
+                                style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; cursor: pointer;">
+                            ✅ Paiement Réussi
+                        </button>
+                        <button onclick="window.billetSystem.completePayment('failed', '${clientData.id}')" 
+                                style="background: #ff4757; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; cursor: pointer;">
+                            ❌ Échec Paiement
+                        </button>
+                    </div>
+                    
+                    <p><small>Simulation - Intégrez un vrai processeur de paiement</small></p>
+                `;
+
+                document.body.appendChild(paymentWindow);
+            }
+
+            completePayment(status, clientId) {
+                const paymentData = {
+                    clientId: clientId,
+                    amount: 0,
+                    currency: 'XOF',
+                    status: status,
+                    method: 'mobile_money',
+                    timestamp: new Date().toISOString()
+                };
+
+                let payments = JSON.parse(localStorage.getItem('bielleterie_payments')) || [];
+                payments.push(paymentData);
+                localStorage.setItem('bielleterie_payments', JSON.stringify(payments));
+
+                let clients = JSON.parse(localStorage.getItem('bielleterie_clients')) || [];
+                const clientIndex = clients.findIndex(c => c.id === clientId);
+                if (clientIndex !== -1) {
+                    clients[clientIndex].paymentStatus = status;
+                    clients[clientIndex].paymentDate = new Date().toISOString();
+                    localStorage.setItem('bielleterie_clients', JSON.stringify(clients));
+                }
+
+                document.querySelectorAll('div').forEach(div => {
+                    if (div.innerHTML.includes('💳 Paiement')) {
+                        div.remove();
+                    }
+                });
+
+                if (status === 'success') {
+                    this.showSuccessMessage('Paiement confirmé ! Votre billet est validé.');
+                    if (confirm('Voulez-vous générer votre billet QR Code ?')) {
+                        this.generateQRCode(clients[clientIndex]);
+                    }
+                } else {
+                    this.showError('Paiement échoué. Veuillez réessayer.');
+                }
+            }
+
+            generateQRCode(clientData) {
+                const qrData = JSON.stringify({
+                    id: clientData.id,
+                    nom1: clientData.nom1,
+                    type: clientData.type,
+                    timestamp: clientData.timestamp,
+                    valid: true
+                });
+
+                const qrContainer = document.createElement('div');
+                qrContainer.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    z-index: 10000;
+                    text-align: center;
+                    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+                `;
+
+                qrContainer.innerHTML = `
+                    <h3>🎫 Votre Billet</h3>
+                    <div id="qrcode-${clientData.id}"></div>
+                    <p><strong>${clientData.nom1}${clientData.nom2 ? ' & ' + clientData.nom2 : ''}</strong></p>
+                    <p>Type: ${clientData.type === 'couple' ? '👫 Couple' : '👤 Unité'}</p>
+                    <p>ID: ${clientData.id}</p>
+                    <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 15px; cursor: pointer;">Fermer</button>
+                `;
+
+                document.body.appendChild(qrContainer);
+
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(document.getElementById(`qrcode-${clientData.id}`), {
+                        text: qrData,
+                        width: 200,
+                        height: 200
+                    });
+                }
+            }
+
+            generateUniqueId() {
+                return 'BLT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            getUserIP() {
+                return 'local';
+            }
+
+            createBackup(clients) {
+                const backup = {
+                    data: clients,
+                    timestamp: new Date().toISOString(),
+                    count: clients.length
+                };
+                localStorage.setItem('bielleterie_backup_' + Date.now(), JSON.stringify(backup));
+                this.cleanOldBackups();
+            }
+
+            cleanOldBackups() {
+                const keys = Object.keys(localStorage).filter(key => key.startsWith('bielleterie_backup_'));
+                if (keys.length > 5) {
+                    keys.sort().slice(0, keys.length - 5).forEach(key => {
+                        localStorage.removeItem(key);
+                    });
+                }
+            }
+
+            showSuccessMessage(message) {
+                const msgDiv = document.createElement('div');
+                msgDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 200, 0, 0.9);
+                    color: white;
+                    padding: 20px 30px;
+                    border-radius: 10px;
+                    z-index: 10000;
+                    font-weight: bold;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                `;
+                msgDiv.textContent = '✅ ' + message;
+                document.body.appendChild(msgDiv);
+                setTimeout(() => msgDiv.remove(), 3000);
+            }
+
+            showError(message) {
+                alert('❌ ' + message);
+            }
+
+            resetForm(type) {
+                if (type === 'couple') {
+                    document.getElementById('user1').value = '';
+                    document.getElementById('user2').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('phone').value = '';
+                } else {
+                    document.getElementById('user').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('phone').value = '';
+                }
+            }
+
+            trackAnalytics() {
+                const pageType = document.querySelector('.billet h1').textContent.includes('Couple') ? 'couple' : 'unite';
+                const analytics = {
+                    pageView: pageType,
+                    timestamp: new Date().toISOString(),
+                    sessionId: this.getSessionId()
+                };
+
+                let analyticsData = JSON.parse(localStorage.getItem('bielleterie_analytics')) || [];
+                analyticsData.push(analytics);
+                localStorage.setItem('bielleterie_analytics', JSON.stringify(analyticsData));
+            }
+
+            trackConversion(type) {
+                const conversion = {
+                    type: type,
+                    timestamp: new Date().toISOString(),
+                    value: type === 'couple' ? 5000 : 3000
+                };
+
+                let conversions = JSON.parse(localStorage.getItem('bielleterie_conversions')) || [];
+                conversions.push(conversion);
+                localStorage.setItem('bielleterie_conversions', JSON.stringify(conversions));
+            }
+
+            getSessionId() {
+                let sessionId = sessionStorage.getItem('bielleterie_session');
+                if (!sessionId) {
+                    sessionId = 'SESS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    sessionStorage.setItem('bielleterie_session', sessionId);
+                }
+                return sessionId;
+            }
+
+            sendConfirmation(clientData) {
+                const emailData = {
+                    to: clientData.email,
+                    subject: 'Confirmation d\'inscription - Bielleterie Ouverte',
+                    body: this.generateEmailContent(clientData),
+                    timestamp: new Date().toISOString()
+                };
+
+                let emailLog = JSON.parse(localStorage.getItem('bielleterie_emails')) || [];
+                emailLog.push(emailData);
+                localStorage.setItem('bielleterie_emails', JSON.stringify(emailLog));
+            }
+
+            sendSMSNotification(clientData) {
+                const smsData = {
+                    to: clientData.phone,
+                    message: this.generateSMSContent(clientData),
+                    timestamp: new Date().toISOString(),
+                    status: 'sent'
+                };
+
+                let smsLog = JSON.parse(localStorage.getItem('bielleterie_sms')) || [];
+                smsLog.push(smsData);
+                localStorage.setItem('bielleterie_sms', JSON.stringify(smsLog));
+            }
+
+            generateEmailContent(clientData) {
+                return `Bonjour ${clientData.nom1},
+
+Merci pour votre inscription à la Bielleterie Ouverte !
+
+Détails de votre réservation :
+- Type : ${clientData.type === 'couple' ? 'Couple' : 'Unité'}
+- Nom${clientData.type === 'couple' ? 's' : ''} : ${clientData.nom1}${clientData.nom2 ? ' & ' + clientData.nom2 : ''}
+- Email : ${clientData.email}
+- Téléphone : ${clientData.phone}
+
+Date : ${CONFIG.EVENT.date}
+Lieu : ${CONFIG.EVENT.location}
+Heure : ${CONFIG.EVENT.time}
+
+Paiement : ${clientData.finalAmount || (clientData.type === 'couple' ? 5000 : 3000)} FCFA
+${clientData.promoCode ? `Code promo appliqué: ${clientData.promoCode}` : ''}
+
+À bientôt !`;
+            }
+
+            generateSMSContent(clientData) {
+                return `Merci ${clientData.nom1}! Inscription Bielleterie confirmée. ${CONFIG.EVENT.date} - ${CONFIG.EVENT.location} - 20h00. ID: ${clientData.id}`;
+            }
+
+            setupReferralSystem() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const referralCode = urlParams.get('ref');
+
+                if (referralCode) {
+                    localStorage.setItem('referralCode', referralCode);
+                    this.showSuccessMessage(`Code parrainage appliqué: ${referralCode}`);
+                }
+            }
+
+            setupSecurity() {
+                this.disableDevTools();
+                this.protectContextMenu();
+                this.monitorActivity();
+            }
+
+            disableDevTools() {
+                document.addEventListener('keydown', (e) => {
+                    if (
+                        e.key === 'F12' ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                        (e.ctrlKey && e.key === 'u')
+                    ) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+
+            protectContextMenu() {
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+            }
+
+            monitorActivity() {
+                let lastClickTime = 0;
+                let suspiciousActivity = 0;
+
+                document.addEventListener('click', (e) => {
+                    const now = Date.now();
+                    if (now - lastClickTime < 100) {
+                        suspiciousActivity++;
+                    }
+                    lastClickTime = now;
+                });
+            }
+
+            showMaintenanceMode() {
+                document.body.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 0; left: 0;
+                        width: 100%; height: 100%;
+                        background: rgba(0,0,0,0.9);
+                        color: white;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 24px;
+                        text-align: center;
+                        z-index: 99999;
+                        padding: 20px;
+                    ">
+                        🔧 Mode Maintenance<br>
+                        <small>Le système est temporairement indisponible</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialisation
+        window.billetSystem = new BilletSystem();
+    </script>
 </body>
 
 </html>

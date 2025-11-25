@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion Admin</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            background: #2d2d2d;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ff6b6b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #3d3d3d;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #ff5252;
+        }
+
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .security-notice {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h1>🔐 Connexion Admin</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Nom d'utilisateur:</label>
+                <input type="text" id="username" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Mot de passe:</label>
+                <input type="password" id="password" required autocomplete="off">
+            </div>
+            <button type="submit">Se connecter</button>
+            <div class="error" id="errorMessage">Identifiants incorrects</div>
+        </form>
+        <div class="security-notice">
+            ⚠️ Accès réservé au personnel autorisé
+        </div>
+    </div>
+
+    <script>
+        let failedAttempts = 0;
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (failedAttempts >= 3) {
+                setTimeout(() => attemptLogin(username, password), 5000);
+                document.getElementById('errorMessage').textContent = 'Trop de tentatives. Veuillez patienter...';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            attemptLogin(username, password);
+        });
+
+        function attemptLogin(username, password) {
+            const validUsername = 'Audace';
+            const validPassword = 'Bielle2024!';
+
+            if (username === validUsername && password === validPassword) {
+                localStorage.setItem('adminAuthenticated', 'true');
+                localStorage.setItem('adminLoginTime', Date.now().toString());
+                window.location.href = 'admin.html';
+            } else {
+                failedAttempts++;
+                document.getElementById('errorMessage').style.display = 'block';
+
+                if (failedAttempts >= 5) {
+                    document.getElementById('errorMessage').textContent = 'Accès bloqué. Contactez l\'administrateur.';
+                    document.getElementById('loginForm').style.display = 'none';
+                }
+            }
+        }
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+
+</html>
