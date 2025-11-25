@@ -13,7 +13,6 @@
     <style>
         body {
             background-image: url(logo2.jpg);
-
             object-fit: cover;
             color: white;
             display: flex;
@@ -33,7 +32,7 @@
             background-image: url(logo2.jpg);
             background-size: cover;
             background-position: center;
-            filter: blur(2px) brightness(0.8);
+            filter: blur(10px) brightness(0.8);
             z-index: -1;
         }
 
@@ -115,6 +114,14 @@
             font-size: 0.8em;
             color: #000000;
         }
+
+        .lock-message {
+            color: #ff4757;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 
@@ -126,22 +133,65 @@
         <form id="loginForm">
             <div class="form-group">
                 <label>Nom d'utilisateur:</label>
-                <input type="text" id="username" required autocomplete="off">
+                <input type="text" id="username" required autocomplete="off" autocomplete="username">
             </div>
             <div class="form-group">
                 <label>Mot de passe:</label>
-                <input type="password" id="password" required autocomplete="off">
+                <input type="password" id="password" required autocomplete="off" autocomplete="current-password">
             </div>
             <button type="submit">Se connecter</button>
             <div class="error" id="errorMessage">Identifiants incorrects</div>
+            <div class="lock-message" id="lockMessage"></div>
         </form>
         <div class="security-notice">
-            ⚠️ Accès au personnel
+            ⚠️ Accès réservé au personnel autorisé
         </div>
     </div>
 
     <script>
         let failedAttempts = 0;
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 5 * 60 * 1000; // 5 minutes
+
+        // Vérifier si l'utilisateur est déjà connecté
+        if (localStorage.getItem('adminAuthenticated') === 'true') {
+            const loginTime = parseInt(localStorage.getItem('adminLoginTime'));
+            const sessionDuration = 2 * 60 * 60 * 1000; // 2 heures
+
+            if (Date.now() - loginTime < sessionDuration) {
+                window.location.href = 'admin.html';
+            } else {
+                // Session expirée
+                localStorage.removeItem('adminAuthenticated');
+                localStorage.removeItem('adminLoginTime');
+                localStorage.removeItem('adminSessionId');
+            }
+        }
+
+        // Vérifier le verrouillage au chargement
+        function checkLockStatus() {
+            const lockUntil = localStorage.getItem('adminLockUntil');
+            if (lockUntil && Date.now() < parseInt(lockUntil)) {
+                const remainingTime = Math.ceil((parseInt(lockUntil) - Date.now()) / 1000 / 60);
+                document.getElementById('lockMessage').textContent =
+                    `🔒 Compte verrouillé. Réessayez dans ${remainingTime} minutes.`;
+                document.getElementById('lockMessage').style.display = 'block';
+                document.getElementById('loginForm').style.display = 'none';
+                return true;
+            }
+            return false;
+        }
+
+        // Vérifier les tentatives précédentes
+        const storedAttempts = localStorage.getItem('adminFailedAttempts');
+        if (storedAttempts) {
+            failedAttempts = parseInt(storedAttempts);
+        }
+
+        // Vérifier le statut de verrouillage au chargement
+        document.addEventListener('DOMContentLoaded', function () {
+            checkLockStatus();
+        });
 
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -149,10 +199,8 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            if (failedAttempts >= 3) {
-                setTimeout(() => attemptLogin(username, password), 5000);
-                document.getElementById('errorMessage').textContent = 'Trop de tentatives. Veuillez patienter...';
-                document.getElementById('errorMessage').style.display = 'block';
+            // Vérifier le verrouillage
+            if (checkLockStatus()) {
                 return;
             }
 
@@ -160,29 +208,98 @@
         });
 
         function attemptLogin(username, password) {
+            // Identifiants sécurisés - En production, utilisez un système d'authentification serveur
             const validUsername = 'Audace';
             const validPassword = '@Alex.1320';
 
             if (username === validUsername && password === validPassword) {
+                // Réinitialiser les tentatives en cas de succès
+                failedAttempts = 0;
+                localStorage.removeItem('adminFailedAttempts');
+                localStorage.removeItem('adminLockUntil');
+
+                // Stocker l'authentification avec timestamp
                 localStorage.setItem('adminAuthenticated', 'true');
                 localStorage.setItem('adminLoginTime', Date.now().toString());
+                localStorage.setItem('adminSessionId', generateSessionId());
+
+                // Journal de connexion
+                logLoginAttempt(username, true);
+
                 window.location.href = 'admin.html';
             } else {
                 failedAttempts++;
-                document.getElementById('errorMessage').style.display = 'block';
+                localStorage.setItem('adminFailedAttempts', failedAttempts.toString());
 
-                if (failedAttempts >= 5) {
-                    document.getElementById('errorMessage').textContent = 'Accès bloqué. Contactez l\'administrateur.';
+                // Journal de tentative échouée
+                logLoginAttempt(username, false);
+
+                if (failedAttempts >= MAX_ATTEMPTS) {
+                    // Verrouiller le compte
+                    const lockUntil = Date.now() + LOCKOUT_TIME;
+                    localStorage.setItem('adminLockUntil', lockUntil.toString());
+
+                    document.getElementById('errorMessage').style.display = 'none';
+                    document.getElementById('lockMessage').textContent =
+                        '🔒 Trop de tentatives. Compte verrouillé pour 5 minutes.';
+                    document.getElementById('lockMessage').style.display = 'block';
                     document.getElementById('loginForm').style.display = 'none';
+                } else {
+                    document.getElementById('errorMessage').textContent =
+                        `❌ Identifiants incorrects. Tentatives restantes: ${MAX_ATTEMPTS - failedAttempts}`;
+                    document.getElementById('errorMessage').style.display = 'block';
                 }
             }
         }
 
+        function generateSessionId() {
+            return 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function logLoginAttempt(username, success) {
+            try {
+                const logEntry = {
+                    username: username,
+                    success: success,
+                    timestamp: new Date().toISOString(),
+                    ip: 'local', // En production, récupérez l'IP réelle
+                    userAgent: navigator.userAgent
+                };
+
+                let loginLog = JSON.parse(localStorage.getItem('adminLoginLog')) || [];
+                loginLog.push(logEntry);
+
+                // Garder seulement les 100 dernières entrées
+                if (loginLog.length > 100) {
+                    loginLog = loginLog.slice(-100);
+                }
+
+                localStorage.setItem('adminLoginLog', JSON.stringify(loginLog));
+            } catch (error) {
+                console.error('Erreur journalisation:', error);
+            }
+        }
+
+        // Sécurité renforcée
         document.addEventListener('contextmenu', e => e.preventDefault());
+
         document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+            if (e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.key === 's')) {
                 e.preventDefault();
             }
+        });
+
+        // Empêcher l'auto-remplissage
+        document.getElementById('username').addEventListener('input', function () {
+            this.value = this.value.replace(/[<>]/g, '');
+        });
+
+        document.getElementById('password').addEventListener('input', function () {
+            this.value = this.value.replace(/[<>]/g, '');
         });
     </script>
 </body>

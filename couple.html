@@ -8,578 +8,533 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <link rel="shortcut icon" href="logo2.jpg">
-    <link rel="icon" href="logo2.jpg" type="image/x-icon">
-    <link rel="icon" href="logo2.jpg" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="logo2.jpg" sizes="180x180">
-    <link rel="manifest" href="/manifest.json">
     <title>Bielleterie-ouverte - Couple</title>
-</head>
-
-<style>
-    * {
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-
-    body {
-        margin: 0;
-        padding: 0;
-        position: relative;
-        min-height: 100vh;
-        overflow-x: hidden;
-    }
-
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url(image\ copy\ 3.png);
-        background-size: cover;
-        background-position: center;
-        filter: blur(2px) brightness(0.8);
-        z-index: -1;
-    }
-
-    /* Bouton info */
-    .info-button {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 20px;
-        border-radius: 30px;
-        backdrop-filter: blur(100px);
-        box-shadow: 0 0 10px #000000;
-        color: #ffffff;
-        border: 1px solid white;
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        cursor: pointer;
-        z-index: 1000;
-        text-decoration: none;
-    }
-
-    .info-button:hover {
-        transform: translateX(2px);
-        background: rgba(255, 255, 255, 0.197);
-        box-shadow: none;
-    }
-
-    /* Logos responsive */
-    .logo {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 100px;
-        height: auto;
-        z-index: 999;
-        border-radius: 50%;
-        padding: 3px;
-        mix-blend-mode: multiply;
-        background: linear-gradient(to right, #ff000000, #ffffff00);
-        z-index: 1000;
-    }
-
-    .logo2 {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        width: 100px;
-        height: auto;
-        z-index: 999;
-        border-radius: 50%;
-        padding: 3px;
-        mix-blend-mode: multiply;
-        background: linear-gradient(to right, #ffffff44, #ffffffac);
-    }
-
-    /* Section principale */
-    .billet {
-        text-align: center;
-        padding: 20px;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 80vh;
-        margin-bottom: 10vh;
-    }
-
-    .ligne {
-        border-bottom: 1px solid #ff0000;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-        width: 100%;
-        max-width: 300px;
-    }
-
-    .billet h1 {
-        font-family: "Mea Culpa", cursive;
-        font-weight: bold;
-        font-style: normal;
-        font-size: clamp(40px, 10vw, 80px);
-        margin-bottom: 20px;
-    }
-
-    .billet h3 {
-        margin: 20px 0 10px;
-        font-size: clamp(16px, 4vw, 20px);
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .user {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        z-index: 1;
-        margin-top: 30px;
-        width: 100%;
-        max-width: 500px;
-        padding: 0 20px;
-    }
-
-    .user-data {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        z-index: 1;
-        margin-top: 30px;
-        width: 100%;
-        max-width: 500px;
-        padding: 0 20px;
-    }
-
-    .users {
-        background: #00000046;
-        width: 100%;
-        max-width: 300px;
-        height: 40px;
-        border-radius: 10px;
-        border: 1px solid #ffffff;
-        box-shadow: 0 0 10px #000000;
-        color: #ffffff;
-        font-size: 16px;
-        text-align: center;
-        padding: 0 15px;
-    }
-
-    .users::placeholder {
-        color: rgba(255, 255, 255, 0.7);
-    }
-
-    .use-btn {
-        margin-top: 20px;
-    }
-
-    .users-btn {
-        width: 130px;
-        height: 40px;
-        background: #a4a2a25d;
-        border-radius: 10px;
-        border: 1px solid #f3f3f3;
-        color: #ffffff;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .users-btn:hover {
-        background: rgba(164, 162, 162, 0.8);
-        transform: scale(1.05);
-    }
-
-    /* Social media buttons wrapper */
-    .wrapper {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999;
-        width: 100%;
-        max-width: 400px;
-    }
-
-    /* Social buttons list */
-    .wrapper ul {
-        display: flex;
-        gap: 10px;
-        list-style: none;
-        padding: 0 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    /* Individual social icon button */
-    .wrapper .icon {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        background: rgba(255, 255, 255, 0.05);
-        transition: all 0.3s ease;
-        box-shadow: 0 15px 35px rgb(0, 0, 0);
-        border: 1px solid rgba(255, 255, 255, 0.288);
-    }
-
-    /* Social icon font styling */
-    .wrapper .icon i {
-        font-size: 18px;
-        color: white;
-    }
-
-    /* Social icon hover animation */
-    .wrapper .icon:hover {
-        transform: scale(1.2);
-    }
-
-    /* Social icon hover colors */
-    .wrapper .facebook:hover {
-        background: #1d7df2;
-    }
-
-    .wrapper .twitter:hover {
-        background: #24a1de;
-    }
-
-    .wrapper .youtube:hover {
-        background: #cd201f;
-    }
-
-    .wrapper .whatsapp:hover {
-        background: rgb(47, 183, 47);
-    }
-
-    .wrapper .telephone:hover {
-        background: #333;
-    }
-
-    .wrapper .mail:hover {
-        background: #d71919;
-    }
-
-    .wrapper .telegram:hover {
-        background: #2aabee;
-    }
-
-    /* Footer text */
-    .edition {
-        margin-top: 30px;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 14px;
-        text-align: center;
-        position: relative;
-        width: 100%;
-        padding: 0 20px;
-    }
-
-    /* --- Styles de la Modale --- */
-    .modal-target {
-        display: none;
-    }
-
-    /* Affiche la modale lorsque son ID est ciblé par l'URL */
-    #modal-info-opened:target {
-        display: flex;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.334);
-        backdrop-filter: blur(10px);
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        padding: 20px;
-    }
-
-    .modal-content {
-        background-color: #00000074;
-        padding: 25px;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        position: relative;
-        color: rgb(255, 255, 255);
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 45px;
-        text-decoration: none;
-        width: 40px;
-        height: 40px;
-        border: 1px solid #ffffff;
-        color: #ffffff;
-        background: none;
-        border: none;
-        cursor: pointer;
-    }
-
-    .close-btn:hover {
-        color: #000;
-    }
-
-    .modal-content h3 {
-        margin-bottom: 15px;
-        font-size: clamp(20px, 5vw, 24px);
-    }
-
-    .modal-content ul {
-        text-align: left;
-        margin: 15px 0;
-        padding-left: 20px;
-    }
-
-    .modal-content li {
-        margin-bottom: 10px;
-        font-size: clamp(14px, 3vw, 16px);
-    }
-
-    /* Media Queries pour différents écrans */
-    @media (min-width: 768px) {
-
-        .logo,
-        .logo2 {
-            width: 120px;
-            top: 30px;
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-        .logo {
-            right: 30px;
+        body {
+            margin: 0;
+            padding: 0;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .logo2 {
-            left: 30px;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(image\ copy\ 3.png);
+            background-size: cover;
+            background-position: center;
+            filter: blur(2px) brightness(0.8);
+            z-index: -1;
         }
 
+        /* Bouton info */
         .info-button {
-            top: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-        }
-
-        .billet h1 {
-            margin-bottom: 40px;
-        }
-
-        .user {
-            margin-top: 50px;
-        }
-
-        .users {
-            width: 350px;
-            font-size: 18px;
-        }
-
-        .wrapper .icon {
             width: 50px;
             height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(100px);
+            box-shadow: 0 0 10px #000000;
+            color: #ffffff;
+            border: 1px solid white;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            z-index: 1000;
+            text-decoration: none;
         }
 
-        .wrapper .icon i {
-            font-size: 22px;
-        }
-    }
-
-    @media (min-width: 1024px) {
-
-        .logo,
-        .logo2 {
-            width: 150px;
-            top: 50px;
+        .info-button:hover {
+            transform: translateX(2px);
+            background: rgba(255, 255, 255, 0.197);
+            box-shadow: none;
         }
 
+        /* Logos responsive */
         .logo {
-            right: 50px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 100px;
+            height: auto;
+            z-index: 999;
+            border-radius: 50%;
+            padding: 3px;
+            mix-blend-mode: multiply;
+            background: linear-gradient(to right, #ff000000, #ffffff00);
+            z-index: 1000;
         }
 
         .logo2 {
-            left: 50px;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 100px;
+            height: auto;
+            z-index: 999;
+            border-radius: 50%;
+            padding: 3px;
+            mix-blend-mode: multiply;
+            background: linear-gradient(to right, #ffffff44, #ffffffac);
+        }
+
+        /* Section principale */
+        .billet {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            margin-bottom: 10vh;
+        }
+
+        .ligne {
+            border-bottom: 1px solid #ff0000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
         }
 
         .billet h1 {
-            font-size: 80px;
+            font-family: "Mea Culpa", cursive;
+            font-weight: bold;
+            font-style: normal;
+            font-size: clamp(40px, 10vw, 80px);
+            margin-bottom: 20px;
+        }
+
+        .billet h3 {
+            margin: 20px 0 10px;
+            font-size: clamp(16px, 4vw, 20px);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .user {
-            gap: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 1;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 20px;
+        }
+
+        .user-data {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 1;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 20px;
         }
 
         .users {
-            width: 400px;
-            height: 45px;
-            font-size: 20px;
+            background: #00000046;
+            width: 100%;
+            max-width: 300px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid #ffffff;
+            box-shadow: 0 0 10px #000000;
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+            padding: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        .users:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px #ff6b6b;
+        }
+
+        .users::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .use-btn {
+            margin-top: 20px;
         }
 
         .users-btn {
-            width: 150px;
-            height: 45px;
-            font-size: 18px;
-        }
-    }
-
-    @media (max-width: 480px) {
-
-        .logo,
-        .logo2 {
-            width: 80px;
-            top: 10px;
+            width: 130px;
+            height: 40px;
+            background: #a4a2a25d;
+            border-radius: 10px;
+            border: 1px solid #f3f3f3;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .logo {
-            right: 10px;
+        .users-btn:hover {
+            background: rgba(164, 162, 162, 0.8);
+            transform: scale(1.05);
         }
 
-        .logo2 {
-            left: 10px;
+        .users-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .info-button {
+        /* Social media buttons wrapper */
+        .wrapper {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Social buttons list */
+        .wrapper ul {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+            padding: 0 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Individual social icon button */
+        .wrapper .icon {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
             width: 45px;
             height: 45px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgb(0, 0, 0);
+            border: 1px solid rgba(255, 255, 255, 0.288);
+        }
+
+        /* Social icon font styling */
+        .wrapper .icon i {
             font-size: 18px;
-            top: 5px;
-            right: 5px;
+            color: white;
         }
 
-        .billet {
-            padding: 10px;
-            min-height: 100vh;
+        /* Social icon hover animation */
+        .wrapper .icon:hover {
+            transform: scale(1.2);
         }
 
-        .billet h1 {
-            font-size: 36px;
-            margin-bottom: 15px;
+        /* Social icon hover colors */
+        .wrapper .facebook:hover {
+            background: #1d7df2;
         }
 
-        .billet h3 {
-            margin: 15px 0 8px;
+        .wrapper .twitter:hover {
+            background: #24a1de;
         }
 
-        .ligne {
-            max-width: 200px;
+        .wrapper .youtube:hover {
+            background: #cd201f;
         }
 
-        .user {
-            margin-top: 20px;
-            gap: 15px;
+        .wrapper .whatsapp:hover {
+            background: rgb(47, 183, 47);
         }
 
-        .users {
-            height: 35px;
-            font-size: 14px;
-            max-width: 250px;
+        .wrapper .telephone:hover {
+            background: #333;
         }
 
-        .users-btn {
-            width: 120px;
-            height: 35px;
-            font-size: 14px;
+        .wrapper .mail:hover {
+            background: #d71919;
         }
 
-        .wrapper .icon {
-            width: 40px;
-            height: 40px;
+        .wrapper .telegram:hover {
+            background: #2aabee;
         }
 
-        .wrapper .icon i {
-            font-size: 16px;
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            text-align: center;
+            max-width: 90%;
         }
 
-        .wrapper ul {
-            gap: 8px;
-        }
-    }
-
-    @media (max-width: 320px) {
-
-        .logo,
-        .logo2 {
-            width: 60px;
+        .notification.error {
+            background: #ff4757;
         }
 
-        .billet h1 {
-            font-size: 32px;
+        .notification.warning {
+            background: #ffa502;
         }
 
-        .billet h3 {
-            font-size: 14px;
+        /* Media Queries pour différents écrans */
+        @media (min-width: 768px) {
+
+            .logo,
+            .logo2 {
+                width: 120px;
+                top: 30px;
+            }
+
+            .logo {
+                right: 30px;
+            }
+
+            .logo2 {
+                left: 30px;
+            }
+
+            .info-button {
+                top: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .billet h1 {
+                margin-bottom: 40px;
+            }
+
+            .user {
+                margin-top: 50px;
+            }
+
+            .users {
+                width: 350px;
+                font-size: 18px;
+            }
+
+            .wrapper .icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .wrapper .icon i {
+                font-size: 22px;
+            }
         }
 
-        .ligne {
-            max-width: 180px;
+        @media (min-width: 1024px) {
+
+            .logo,
+            .logo2 {
+                width: 150px;
+                top: 50px;
+            }
+
+            .logo {
+                right: 50px;
+            }
+
+            .logo2 {
+                left: 50px;
+            }
+
+            .billet h1 {
+                font-size: 80px;
+            }
+
+            .user {
+                gap: 25px;
+            }
+
+            .users {
+                width: 400px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .users-btn {
+                width: 150px;
+                height: 45px;
+                font-size: 18px;
+            }
         }
 
-        .user {
-            gap: 12px;
+        @media (max-width: 480px) {
+
+            .logo,
+            .logo2 {
+                width: 80px;
+                top: 10px;
+            }
+
+            .logo {
+                right: 10px;
+            }
+
+            .logo2 {
+                left: 10px;
+            }
+
+            .info-button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+                top: 5px;
+                right: 5px;
+            }
+
+            .billet {
+                padding: 10px;
+                min-height: 100vh;
+            }
+
+            .billet h1 {
+                font-size: 36px;
+                margin-bottom: 15px;
+            }
+
+            .billet h3 {
+                margin: 15px 0 8px;
+            }
+
+            .ligne {
+                max-width: 200px;
+            }
+
+            .user {
+                margin-top: 20px;
+                gap: 15px;
+            }
+
+            .users {
+                height: 35px;
+                font-size: 14px;
+                max-width: 250px;
+            }
+
+            .users-btn {
+                width: 120px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            .wrapper .icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .wrapper .icon i {
+                font-size: 16px;
+            }
+
+            .wrapper ul {
+                gap: 8px;
+            }
         }
 
-        .users {
-            max-width: 220px;
-            height: 32px;
-            font-size: 12px;
-        }
+        @media (max-width: 320px) {
 
-        .users-btn {
-            width: 100px;
-            height: 32px;
-            font-size: 12px;
-        }
+            .logo,
+            .logo2 {
+                width: 60px;
+            }
 
-        .wrapper .icon {
-            width: 35px;
-            height: 35px;
-        }
+            .billet h1 {
+                font-size: 32px;
+            }
 
-        .wrapper .icon i {
-            font-size: 14px;
+            .billet h3 {
+                font-size: 14px;
+            }
+
+            .ligne {
+                max-width: 180px;
+            }
+
+            .user {
+                gap: 12px;
+            }
+
+            .users {
+                max-width: 220px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .users-btn {
+                width: 100px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .wrapper .icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .wrapper .icon i {
+                font-size: 14px;
+            }
         }
-    }
-</style>
+    </style>
+</head>
 
 <body>
 
     <img src="logo.jpg" class="logo" alt="Logo">
     <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
 
+    <div class="notification" id="notification"></div>
+
     <div class="billet">
         <h1 class="ligne">Couple</h1>
 
         <div class="user">
-            <input type="text" class="users" name="user1" placeholder="Entrez votre nom" id="user1">
-            <input type="text" class="users" name="user2" placeholder="Nom de votre partenaire" id="user2">
+            <input type="text" class="users" name="user1" placeholder="Entrez votre nom" id="user1" maxlength="50">
+            <input type="text" class="users" name="user2" placeholder="Nom de votre partenaire" id="user2"
+                maxlength="50">
         </div>
 
         <h3>Votre mail</h3>
         <div class="user-data">
-            <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email">
-            <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone">
+            <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email" maxlength="100">
+            <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone" maxlength="15">
             <div class="use-btn">
                 <input type="button" class="users-btn" value="Entrer" id="submitBtn">
             </div>
@@ -593,25 +548,21 @@
                     <i class="fa-brands fa-whatsapp"></i>
                 </a>
             </li>
-
             <li class="icon telegram">
                 <a href="https://t.me/+" aria-label="Telegram" rel="noopener noreferrer" target="_blank">
                     <i class="fa-brands fa-telegram"></i>
                 </a>
             </li>
-
             <li class="icon telephone">
                 <a href="tel:+" aria-label="Téléphone" rel="noopener">
                     <i class="fa fa-phone" aria-hidden="true"></i>
                 </a>
             </li>
-
             <li class="icon facebook">
                 <a href="" aria-label="Facebook" rel="noopener noreferrer" target="_blank">
                     <i class="fa-brands fa-facebook-f"></i>
                 </a>
             </li>
-
             <li class="icon youtube">
                 <a href="" aria-label="YouTube" rel="noopener noreferrer" target="_blank">
                     <i class="fab fa-youtube"></i>
@@ -621,29 +572,10 @@
     </div>
 
     <script>
-        // CONFIGURATION
-        const CONFIG = {
-            VERSION: '2.0',
-            EVENT: {
-                name: 'Bielleterie Ouverte',
-                date: '2026-01-03',
-                location: 'Moscou',
-                time: '20:00'
-            },
-            PRICING: {
-                couple: 5000,
-                unite: 3000
-            },
-            SECURITY: {
-                adminPassword: 'Bielle2024!',
-                sessionTimeout: 30,
-                maxAttempts: 5
-            }
-        };
-
-        // SYSTÈME PRINCIPAL
-        class BilletSystem {
+        // SYSTÈME CLIENT SÉCURISÉ POUR COUPLE
+        class BilletSystemCouple {
             constructor() {
+                this.amount = 5000; // Prix couple
                 this.init();
             }
 
@@ -651,13 +583,7 @@
                 document.addEventListener('DOMContentLoaded', () => {
                     this.setupFormSubmission();
                     this.setupSecurity();
-                    this.trackAnalytics();
-                    this.setupReferralSystem();
-
-                    // Vérifier le mode maintenance
-                    if (localStorage.getItem('maintenance_mode') === 'true') {
-                        this.showMaintenanceMode();
-                    }
+                    this.setupInputValidation();
                 });
             }
 
@@ -670,6 +596,7 @@
                     this.handleFormSubmission();
                 });
 
+                // Soumission avec Enter
                 document.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         this.handleFormSubmission();
@@ -677,41 +604,60 @@
                 });
             }
 
-            handleFormSubmission() {
-                const isCouplePage = document.querySelector('.billet h1').textContent.includes('Couple');
-                const type = isCouplePage ? 'couple' : 'unite';
+            setupInputValidation() {
+                const inputs = document.querySelectorAll('.users');
+                inputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        this.validateInput(e.target);
+                    });
+                });
+            }
 
-                let clientData;
+            validateInput(input) {
+                const value = input.value.trim();
 
-                if (type === 'couple') {
-                    clientData = this.getCoupleData();
-                } else {
-                    clientData = this.getUniteData();
-                }
-
-                if (!clientData) return;
-
-                // Appliquer code promo
-                clientData = this.applyPromoCode(clientData);
-
-                // Appliquer parrainage
-                clientData = this.applyReferral(clientData);
-
-                if (this.saveClientData(clientData)) {
-                    this.showSuccessMessage('Inscription réussie !');
-                    this.processPayment(clientData);
-                    this.sendConfirmation(clientData);
-                    this.sendSMSNotification(clientData);
-                    this.resetForm(type);
+                switch (input.type) {
+                    case 'text':
+                        // Validation nom : seulement lettres, espaces et certains caractères spéciaux
+                        input.value = value.replace(/[^a-zA-ZÀ-ÿ\s\-']/g, '');
+                        break;
+                    case 'email':
+                        // Validation email basique
+                        if (value && !this.validateEmail(value)) {
+                            input.style.borderColor = '#ff4757';
+                        } else {
+                            input.style.borderColor = '#ffffff';
+                        }
+                        break;
+                    case 'tel':
+                        // Validation téléphone : seulement chiffres, +, -, espaces, parenthèses
+                        input.value = value.replace(/[^\d+\-\s()]/g, '');
+                        if (value && !this.validatePhone(value)) {
+                            input.style.borderColor = '#ff4757';
+                        } else {
+                            input.style.borderColor = '#ffffff';
+                        }
+                        break;
                 }
             }
 
-            getCoupleData() {
+            handleFormSubmission() {
+                const clientData = this.getFormData();
+                if (!clientData) return;
+
+                this.saveClientData(clientData);
+                this.showSuccess('Inscription réussie !');
+                this.processPayment(clientData);
+                this.resetForm();
+            }
+
+            getFormData() {
                 const nom1 = document.getElementById('user1').value.trim();
                 const nom2 = document.getElementById('user2').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const phone = document.getElementById('phone').value.trim();
 
+                // Validation des champs requis
                 if (!this.validateRequired([nom1, email, phone])) {
                     this.showError('Veuillez remplir tous les champs obligatoires');
                     return null;
@@ -727,6 +673,11 @@
                     return null;
                 }
 
+                if (!this.validateName(nom1) || (nom2 && !this.validateName(nom2))) {
+                    this.showError('Un nom contient des caractères non autorisés');
+                    return null;
+                }
+
                 return {
                     nom1: nom1,
                     nom2: nom2,
@@ -737,41 +688,8 @@
                     page: 'couple',
                     ip: this.getUserIP(),
                     userAgent: navigator.userAgent,
-                    id: this.generateUniqueId()
-                };
-            }
-
-            getUniteData() {
-                const nom = document.getElementById('user').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const phone = document.getElementById('phone').value.trim();
-
-                if (!this.validateRequired([nom, email, phone])) {
-                    this.showError('Veuillez remplir tous les champs obligatoires');
-                    return null;
-                }
-
-                if (!this.validateEmail(email)) {
-                    this.showError('Veuillez entrer un email valide');
-                    return null;
-                }
-
-                if (!this.validatePhone(phone)) {
-                    this.showError('Veuillez entrer un numéro de téléphone valide');
-                    return null;
-                }
-
-                return {
-                    nom1: nom,
-                    nom2: null,
-                    email: email,
-                    phone: phone,
-                    type: 'unite',
-                    timestamp: new Date().toISOString(),
-                    page: 'unite',
-                    ip: this.getUserIP(),
-                    userAgent: navigator.userAgent,
-                    id: this.generateUniqueId()
+                    id: this.generateUniqueId(),
+                    paiement: 'En attente'
                 };
             }
 
@@ -785,90 +703,35 @@
             }
 
             validatePhone(phone) {
-                const re = /^[0-9+\-\s()]{10,}$/;
-                return re.test(phone.replace(/\s/g, ''));
+                const cleaned = phone.replace(/\s/g, '');
+                const re = /^[\+]?[0-9\-\s\(\)]{10,}$/;
+                return re.test(cleaned) && cleaned.replace(/\D/g, '').length >= 8;
             }
 
-            applyPromoCode(clientData) {
-                const promoCode = prompt('Entrez votre code promotionnel (laisser vide si aucun):');
-
-                if (!promoCode) return clientData;
-
-                const validPromos = JSON.parse(localStorage.getItem('bielleterie_promocodes')) || {
-                    'BIELLE10': { discount: 0.1, type: 'percentage' },
-                    'BIELLE500': { discount: 500, type: 'fixed' },
-                    'EARLYBIRD': { discount: 0.15, type: 'percentage' }
-                };
-
-                const promo = validPromos[promoCode.toUpperCase()];
-
-                if (promo) {
-                    const originalAmount = clientData.type === 'couple' ? 5000 : 3000;
-                    let discountAmount = 0;
-
-                    if (promo.type === 'percentage') {
-                        discountAmount = originalAmount * promo.discount;
-                    } else {
-                        discountAmount = promo.discount;
-                    }
-
-                    const finalAmount = Math.max(0, originalAmount - discountAmount);
-
-                    clientData.promoCode = promoCode;
-                    clientData.discount = discountAmount;
-                    clientData.finalAmount = finalAmount;
-                    clientData.originalAmount = originalAmount;
-
-                    this.showSuccessMessage(`Code promo appliqué ! Économie: ${discountAmount} FCFA`);
-                } else if (promoCode) {
-                    this.showError('Code promo invalide');
-                }
-
-                return clientData;
+            validateName(name) {
+                const re = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+                return re.test(name);
             }
 
-            applyReferral(clientData) {
-                const referralCode = localStorage.getItem('referralCode');
-                if (referralCode) {
-                    clientData.referredBy = referralCode;
-                    clientData.referralDiscount = 200;
+            generateUniqueId() {
+                return 'CPL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
 
-                    let referrals = JSON.parse(localStorage.getItem('bielleterie_referrals')) || [];
-                    referrals.push({
-                        referrer: referralCode,
-                        referred: clientData.email,
-                        timestamp: new Date().toISOString(),
-                        clientId: clientData.id
-                    });
-                    localStorage.setItem('bielleterie_referrals', JSON.stringify(referrals));
-                }
-                return clientData;
+            getUserIP() {
+                // En production, utiliser un service d'API IP
+                return 'local';
             }
 
             saveClientData(clientData) {
                 try {
-                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients')) || [];
+                    // Sauvegarde sécurisée dans l'espace admin
+                    this.saveToAdminStorage(clientData);
 
-                    const existingIndex = clients.findIndex(client =>
-                        client.email === clientData.email || client.phone === clientData.phone
-                    );
+                    // Sauvegarde locale de backup
+                    this.saveToLocalBackup(clientData);
 
-                    if (existingIndex !== -1) {
-                        if (!confirm('Ce contact est déjà enregistré. Voulez-vous mettre à jour les informations ?')) {
-                            return false;
-                        }
-                        clients[existingIndex] = clientData;
-                    } else {
-                        clients.push(clientData);
-                    }
-
-                    localStorage.setItem('bielleterie_clients', JSON.stringify(clients));
-                    this.createBackup(clients);
-                    this.trackConversion(clientData.type);
-
-                    console.log('✅ Client enregistré:', clientData);
+                    console.log('✅ Données enregistrées de manière sécurisée');
                     return true;
-
                 } catch (error) {
                     console.error('❌ Erreur sauvegarde:', error);
                     this.showError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
@@ -876,292 +739,203 @@
                 }
             }
 
-            processPayment(clientData) {
-                const amount = clientData.finalAmount || (clientData.type === 'couple' ? 5000 : 3000);
+            saveToAdminStorage(clientData) {
+                try {
+                    // Récupérer les données existantes (chiffrées)
+                    const encryptedData = localStorage.getItem('bielleterie_clients_secure');
+                    let clients = [];
 
+                    if (encryptedData) {
+                        // Déchiffrer les données
+                        clients = JSON.parse(decodeURIComponent(escape(atob(encryptedData)))) || [];
+                    }
+
+                    // Vérifier les doublons
+                    const isDuplicate = clients.some(client =>
+                        client.email === clientData.email || client.phone === clientData.phone
+                    );
+
+                    if (!isDuplicate) {
+                        clients.push(clientData);
+
+                        // Chiffrer et sauvegarder
+                        const newEncryptedData = btoa(unescape(encodeURIComponent(JSON.stringify(clients))));
+                        localStorage.setItem('bielleterie_clients_secure', newEncryptedData);
+                    } else {
+                        console.log('⚠️ Client déjà enregistré');
+                    }
+                } catch (error) {
+                    console.error('Erreur sauvegarde admin:', error);
+                    throw error;
+                }
+            }
+
+            saveToLocalBackup(clientData) {
+                try {
+                    let backupData = JSON.parse(localStorage.getItem('bielleterie_backup_couple')) || [];
+                    backupData.push(clientData);
+
+                    // Garder seulement les 50 derniers enregistrements
+                    if (backupData.length > 50) {
+                        backupData = backupData.slice(-50);
+                    }
+
+                    localStorage.setItem('bielleterie_backup_couple', JSON.stringify(backupData));
+                } catch (error) {
+                    console.error('Erreur sauvegarde backup:', error);
+                }
+            }
+
+            processPayment(clientData) {
                 const paymentWindow = document.createElement('div');
                 paymentWindow.style.cssText = `
                     position: fixed;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    background: white;
+                    background: rgba(0, 0, 0, 0.95);
                     padding: 30px;
                     border-radius: 15px;
                     z-index: 10000;
-                    color: black;
+                    color: white;
                     text-align: center;
                     min-width: 300px;
-                    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+                    box-shadow: 0 0 50px rgba(255,107,107,0.3);
+                    border: 2px solid #ff6b6b;
+                    backdrop-filter: blur(10px);
                 `;
 
                 paymentWindow.innerHTML = `
-                    <h3>💳 Paiement</h3>
-                    <p>Montant: <strong>${amount} FCFA</strong></p>
-                    <p>Type: ${clientData.type}</p>
-                    ${clientData.promoCode ? `<p>Code promo: ${clientData.promoCode} (-${clientData.discount} FCFA)</p>` : ''}
+                    <h3 style="color: #ff6b6b; margin-bottom: 20px;">💳 Paiement Couple</h3>
+                    <p><strong>${clientData.nom1}</strong> & <strong>${clientData.nom2 || 'Partenaire'}</strong></p>
+                    <p>Email: ${clientData.email}</p>
+                    <p>Téléphone: ${clientData.phone}</p>
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(255,107,107,0.1); border-radius: 10px;">
+                        <p style="font-size: 24px; font-weight: bold; color: #ff6b6b;">${this.amount} FCFA</p>
+                    </div>
                     
                     <div style="margin: 20px 0;">
                         <button onclick="window.billetSystem.completePayment('success', '${clientData.id}')" 
-                                style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; cursor: pointer;">
+                                style="background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
                             ✅ Paiement Réussi
                         </button>
                         <button onclick="window.billetSystem.completePayment('failed', '${clientData.id}')" 
-                                style="background: #ff4757; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; cursor: pointer;">
+                                style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
                             ❌ Échec Paiement
                         </button>
                     </div>
                     
-                    <p><small>Simulation - Intégrez un vrai processeur de paiement</small></p>
+                    <p style="font-size: 12px; color: #ccc; margin-top: 20px;">
+                        ⚠️ Simulation - Intégrez un vrai processeur de paiement
+                    </p>
                 `;
 
                 document.body.appendChild(paymentWindow);
+
+                // Désactiver le bouton de soumission
+                document.getElementById('submitBtn').disabled = true;
             }
 
             completePayment(status, clientId) {
-                const paymentData = {
-                    clientId: clientId,
-                    amount: 0,
-                    currency: 'XOF',
-                    status: status,
-                    method: 'mobile_money',
-                    timestamp: new Date().toISOString()
-                };
+                try {
+                    // Mettre à jour le statut de paiement
+                    this.updatePaymentStatus(clientId, status);
 
-                let payments = JSON.parse(localStorage.getItem('bielleterie_payments')) || [];
-                payments.push(paymentData);
-                localStorage.setItem('bielleterie_payments', JSON.stringify(payments));
-
-                let clients = JSON.parse(localStorage.getItem('bielleterie_clients')) || [];
-                const clientIndex = clients.findIndex(c => c.id === clientId);
-                if (clientIndex !== -1) {
-                    clients[clientIndex].paymentStatus = status;
-                    clients[clientIndex].paymentDate = new Date().toISOString();
-                    localStorage.setItem('bielleterie_clients', JSON.stringify(clients));
-                }
-
-                document.querySelectorAll('div').forEach(div => {
-                    if (div.innerHTML.includes('💳 Paiement')) {
-                        div.remove();
-                    }
-                });
-
-                if (status === 'success') {
-                    this.showSuccessMessage('Paiement confirmé ! Votre billet est validé.');
-                    if (confirm('Voulez-vous générer votre billet QR Code ?')) {
-                        this.generateQRCode(clients[clientIndex]);
-                    }
-                } else {
-                    this.showError('Paiement échoué. Veuillez réessayer.');
-                }
-            }
-
-            generateQRCode(clientData) {
-                const qrData = JSON.stringify({
-                    id: clientData.id,
-                    nom1: clientData.nom1,
-                    type: clientData.type,
-                    timestamp: clientData.timestamp,
-                    valid: true
-                });
-
-                const qrContainer = document.createElement('div');
-                qrContainer.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    z-index: 10000;
-                    text-align: center;
-                    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-                `;
-
-                qrContainer.innerHTML = `
-                    <h3>🎫 Votre Billet</h3>
-                    <div id="qrcode-${clientData.id}"></div>
-                    <p><strong>${clientData.nom1}${clientData.nom2 ? ' & ' + clientData.nom2 : ''}</strong></p>
-                    <p>Type: ${clientData.type === 'couple' ? '👫 Couple' : '👤 Unité'}</p>
-                    <p>ID: ${clientData.id}</p>
-                    <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 15px; cursor: pointer;">Fermer</button>
-                `;
-
-                document.body.appendChild(qrContainer);
-
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(document.getElementById(`qrcode-${clientData.id}`), {
-                        text: qrData,
-                        width: 200,
-                        height: 200
+                    // Fermer la fenêtre de paiement
+                    document.querySelectorAll('div').forEach(div => {
+                        if (div.innerHTML.includes('💳 Paiement Couple')) {
+                            div.remove();
+                        }
                     });
+
+                    // Réactiver le bouton
+                    document.getElementById('submitBtn').disabled = false;
+
+                    if (status === 'success') {
+                        this.showSuccess('Paiement confirmé ! Votre billet est validé.');
+                        this.trackConversion('couple', this.amount);
+                    } else {
+                        this.showError('Paiement échoué. Veuillez réessayer.');
+                    }
+                } catch (error) {
+                    console.error('Erreur paiement:', error);
+                    this.showError('Erreur lors du traitement du paiement.');
                 }
             }
 
-            generateUniqueId() {
-                return 'BLT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            }
+            updatePaymentStatus(clientId, status) {
+                try {
+                    const encryptedData = localStorage.getItem('bielleterie_clients_secure');
+                    if (encryptedData) {
+                        let clients = JSON.parse(decodeURIComponent(escape(atob(encryptedData)))) || [];
 
-            getUserIP() {
-                return 'local';
-            }
+                        const clientIndex = clients.findIndex(client => client.id === clientId);
+                        if (clientIndex !== -1) {
+                            clients[clientIndex].paiement = status === 'success' ? 'Payé' : 'Échec';
+                            clients[clientIndex].paymentDate = new Date().toISOString();
 
-            createBackup(clients) {
-                const backup = {
-                    data: clients,
-                    timestamp: new Date().toISOString(),
-                    count: clients.length
-                };
-                localStorage.setItem('bielleterie_backup_' + Date.now(), JSON.stringify(backup));
-                this.cleanOldBackups();
-            }
-
-            cleanOldBackups() {
-                const keys = Object.keys(localStorage).filter(key => key.startsWith('bielleterie_backup_'));
-                if (keys.length > 5) {
-                    keys.sort().slice(0, keys.length - 5).forEach(key => {
-                        localStorage.removeItem(key);
-                    });
+                            const newEncryptedData = btoa(unescape(encodeURIComponent(JSON.stringify(clients))));
+                            localStorage.setItem('bielleterie_clients_secure', newEncryptedData);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur mise à jour paiement:', error);
                 }
             }
 
-            showSuccessMessage(message) {
-                const msgDiv = document.createElement('div');
-                msgDiv.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(0, 200, 0, 0.9);
-                    color: white;
-                    padding: 20px 30px;
-                    border-radius: 10px;
-                    z-index: 10000;
-                    font-weight: bold;
-                    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                `;
-                msgDiv.textContent = '✅ ' + message;
-                document.body.appendChild(msgDiv);
-                setTimeout(() => msgDiv.remove(), 3000);
+            trackConversion(type, amount) {
+                try {
+                    const conversion = {
+                        type: type,
+                        amount: amount,
+                        timestamp: new Date().toISOString(),
+                        page: 'couple'
+                    };
+
+                    let conversions = JSON.parse(localStorage.getItem('bielleterie_conversions')) || [];
+                    conversions.push(conversion);
+
+                    // Garder seulement les 100 dernières conversions
+                    if (conversions.length > 100) {
+                        conversions = conversions.slice(-100);
+                    }
+
+                    localStorage.setItem('bielleterie_conversions', JSON.stringify(conversions));
+                } catch (error) {
+                    console.error('Erreur tracking conversion:', error);
+                }
+            }
+
+            showSuccess(message) {
+                this.showNotification(message, 'success');
             }
 
             showError(message) {
-                alert('❌ ' + message);
+                this.showNotification(message, 'error');
             }
 
-            resetForm(type) {
-                if (type === 'couple') {
-                    document.getElementById('user1').value = '';
-                    document.getElementById('user2').value = '';
-                    document.getElementById('email').value = '';
-                    document.getElementById('phone').value = '';
-                } else {
-                    document.getElementById('user').value = '';
-                    document.getElementById('email').value = '';
-                    document.getElementById('phone').value = '';
-                }
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.style.display = 'block';
+
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
             }
 
-            trackAnalytics() {
-                const pageType = document.querySelector('.billet h1').textContent.includes('Couple') ? 'couple' : 'unite';
-                const analytics = {
-                    pageView: pageType,
-                    timestamp: new Date().toISOString(),
-                    sessionId: this.getSessionId()
-                };
-
-                let analyticsData = JSON.parse(localStorage.getItem('bielleterie_analytics')) || [];
-                analyticsData.push(analytics);
-                localStorage.setItem('bielleterie_analytics', JSON.stringify(analyticsData));
-            }
-
-            trackConversion(type) {
-                const conversion = {
-                    type: type,
-                    timestamp: new Date().toISOString(),
-                    value: type === 'couple' ? 5000 : 3000
-                };
-
-                let conversions = JSON.parse(localStorage.getItem('bielleterie_conversions')) || [];
-                conversions.push(conversion);
-                localStorage.setItem('bielleterie_conversions', JSON.stringify(conversions));
-            }
-
-            getSessionId() {
-                let sessionId = sessionStorage.getItem('bielleterie_session');
-                if (!sessionId) {
-                    sessionId = 'SESS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                    sessionStorage.setItem('bielleterie_session', sessionId);
-                }
-                return sessionId;
-            }
-
-            sendConfirmation(clientData) {
-                const emailData = {
-                    to: clientData.email,
-                    subject: 'Confirmation d\'inscription - Bielleterie Ouverte',
-                    body: this.generateEmailContent(clientData),
-                    timestamp: new Date().toISOString()
-                };
-
-                let emailLog = JSON.parse(localStorage.getItem('bielleterie_emails')) || [];
-                emailLog.push(emailData);
-                localStorage.setItem('bielleterie_emails', JSON.stringify(emailLog));
-            }
-
-            sendSMSNotification(clientData) {
-                const smsData = {
-                    to: clientData.phone,
-                    message: this.generateSMSContent(clientData),
-                    timestamp: new Date().toISOString(),
-                    status: 'sent'
-                };
-
-                let smsLog = JSON.parse(localStorage.getItem('bielleterie_sms')) || [];
-                smsLog.push(smsData);
-                localStorage.setItem('bielleterie_sms', JSON.stringify(smsLog));
-            }
-
-            generateEmailContent(clientData) {
-                return `Bonjour ${clientData.nom1},
-
-Merci pour votre inscription à la Bielleterie Ouverte !
-
-Détails de votre réservation :
-- Type : ${clientData.type === 'couple' ? 'Couple' : 'Unité'}
-- Nom${clientData.type === 'couple' ? 's' : ''} : ${clientData.nom1}${clientData.nom2 ? ' & ' + clientData.nom2 : ''}
-- Email : ${clientData.email}
-- Téléphone : ${clientData.phone}
-
-Date : ${CONFIG.EVENT.date}
-Lieu : ${CONFIG.EVENT.location}
-Heure : ${CONFIG.EVENT.time}
-
-Paiement : ${clientData.finalAmount || (clientData.type === 'couple' ? 5000 : 3000)} FCFA
-${clientData.promoCode ? `Code promo appliqué: ${clientData.promoCode}` : ''}
-
-À bientôt !`;
-            }
-
-            generateSMSContent(clientData) {
-                return `Merci ${clientData.nom1}! Inscription Bielleterie confirmée. ${CONFIG.EVENT.date} - ${CONFIG.EVENT.location} - 20h00. ID: ${clientData.id}`;
-            }
-
-            setupReferralSystem() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const referralCode = urlParams.get('ref');
-
-                if (referralCode) {
-                    localStorage.setItem('referralCode', referralCode);
-                    this.showSuccessMessage(`Code parrainage appliqué: ${referralCode}`);
-                }
+            resetForm() {
+                document.getElementById('user1').value = '';
+                document.getElementById('user2').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('phone').value = '';
             }
 
             setupSecurity() {
                 this.disableDevTools();
                 this.protectContextMenu();
-                this.monitorActivity();
+                this.preventCopyPaste();
             }
 
             disableDevTools() {
@@ -1170,9 +944,11 @@ ${clientData.promoCode ? `Code promo appliqué: ${clientData.promoCode}` : ''}
                         e.key === 'F12' ||
                         (e.ctrlKey && e.shiftKey && e.key === 'I') ||
                         (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-                        (e.ctrlKey && e.key === 'u')
+                        (e.ctrlKey && e.key === 'u') ||
+                        (e.ctrlKey && e.key === 's')
                     ) {
                         e.preventDefault();
+                        this.showError('Action non autorisée');
                         return false;
                     }
                 });
@@ -1181,48 +957,26 @@ ${clientData.promoCode ? `Code promo appliqué: ${clientData.promoCode}` : ''}
             protectContextMenu() {
                 document.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
+                    this.showError('Action non autorisée');
                     return false;
                 });
             }
 
-            monitorActivity() {
-                let lastClickTime = 0;
-                let suspiciousActivity = 0;
-
-                document.addEventListener('click', (e) => {
-                    const now = Date.now();
-                    if (now - lastClickTime < 100) {
-                        suspiciousActivity++;
-                    }
-                    lastClickTime = now;
+            preventCopyPaste() {
+                document.addEventListener('copy', (e) => {
+                    e.preventDefault();
+                    this.showError('Copie non autorisée');
                 });
-            }
 
-            showMaintenanceMode() {
-                document.body.innerHTML = `
-                    <div style="
-                        position: fixed;
-                        top: 0; left: 0;
-                        width: 100%; height: 100%;
-                        background: rgba(0,0,0,0.9);
-                        color: white;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-size: 24px;
-                        text-align: center;
-                        z-index: 99999;
-                        padding: 20px;
-                    ">
-                        🔧 Mode Maintenance<br>
-                        <small>Le système est temporairement indisponible</small>
-                    </div>
-                `;
+                document.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    this.showError('Collage non autorisé');
+                });
             }
         }
 
         // Initialisation
-        window.billetSystem = new BilletSystem();
+        window.billetSystem = new BilletSystemCouple();
     </script>
 </body>
 

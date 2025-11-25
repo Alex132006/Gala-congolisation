@@ -157,6 +157,13 @@
         font-size: 16px;
         text-align: center;
         padding: 0 15px;
+        transition: all 0.3s ease;
+    }
+
+    .users:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 10px #ff6b6b;
     }
 
     .users::placeholder {
@@ -182,6 +189,12 @@
     .users-btn:hover {
         background: rgba(164, 162, 162, 0.8);
         transform: scale(1.05);
+    }
+
+    .users-btn:disabled {
+        background: #666;
+        cursor: not-allowed;
+        transform: none;
     }
 
     /* Social media buttons wrapper */
@@ -260,84 +273,30 @@
         background: #2aabee;
     }
 
-    /* Footer text */
-    .edition {
-        margin-top: 30px;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 14px;
-        text-align: center;
-        position: relative;
-        width: 100%;
-        padding: 0 20px;
-    }
-
-    /* --- Styles de la Modale --- */
-    .modal-target {
-        display: none;
-    }
-
-    /* Affiche la modale lorsque son ID est ciblé par l'URL */
-    #modal-info-opened:target {
-        display: flex;
+    /* Notification */
+    .notification {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.334);
-        backdrop-filter: blur(10px);
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        padding: 20px;
-    }
-
-    .modal-content {
-        background-color: #00000074;
-        padding: 25px;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4CAF50;
+        color: white;
+        padding: 15px 25px;
         border-radius: 10px;
-        width: 100%;
-        max-width: 500px;
+        z-index: 10000;
+        display: none;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        position: relative;
-        color: rgb(255, 255, 255);
-        max-height: 90vh;
-        overflow-y: auto;
+        font-weight: bold;
+        text-align: center;
+        max-width: 90%;
     }
 
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 45px;
-        text-decoration: none;
-        width: 40px;
-        height: 40px;
-        border: 1px solid #ffffff;
-        color: #ffffff;
-        background: none;
-        border: none;
-        cursor: pointer;
+    .notification.error {
+        background: #ff4757;
     }
 
-    .close-btn:hover {
-        color: #000;
-    }
-
-    .modal-content h3 {
-        margin-bottom: 15px;
-        font-size: clamp(20px, 5vw, 24px);
-    }
-
-    .modal-content ul {
-        text-align: left;
-        margin: 15px 0;
-        padding-left: 20px;
-    }
-
-    .modal-content li {
-        margin-bottom: 10px;
-        font-size: clamp(14px, 3vw, 16px);
+    .notification.warning {
+        background: #ffa502;
     }
 
     /* Media Queries pour différents écrans */
@@ -541,13 +500,15 @@
     <img src="logo.jpg" class="logo" alt="Logo">
     <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
 
+    <div class="notification" id="notification"></div>
+
     <div class="billet">
         <h1 class="ligne">Unite</h1>
 
         <div class="user">
-            <input type="text" class="users" name="user" placeholder="Entrez votre nom" id="user">
-            <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email">
-            <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone">
+            <input type="text" class="users" name="user" placeholder="Entrez votre nom" id="user" maxlength="50">
+            <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email" maxlength="100">
+            <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone" maxlength="15">
             <div class="use-btn">
                 <input type="button" class="users-btn" value="Entrer" id="submitBtn">
             </div>
@@ -589,8 +550,408 @@
     </div>
 
     <script>
-        // Même script que pour couple.html - Copier le script complet de couple.html ici
-        // CONFIGURATION et classe BilletSystem identiques...
+        // SYSTÈME CLIENT SÉCURISÉ POUR UNITE
+        class BilletSystemUnite {
+            constructor() {
+                this.amount = 3000; // Prix unité
+                this.init();
+            }
+
+            init() {
+                document.addEventListener('DOMContentLoaded', () => {
+                    this.setupFormSubmission();
+                    this.setupSecurity();
+                    this.setupInputValidation();
+                });
+            }
+
+            setupFormSubmission() {
+                const submitBtn = document.getElementById('submitBtn');
+                if (!submitBtn) return;
+
+                submitBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.handleFormSubmission();
+                });
+
+                // Soumission avec Enter
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleFormSubmission();
+                    }
+                });
+            }
+
+            setupInputValidation() {
+                const inputs = document.querySelectorAll('.users');
+                inputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        this.validateInput(e.target);
+                    });
+                });
+            }
+
+            validateInput(input) {
+                const value = input.value.trim();
+
+                switch (input.type) {
+                    case 'text':
+                        // Validation nom : seulement lettres, espaces et certains caractères spéciaux
+                        input.value = value.replace(/[^a-zA-ZÀ-ÿ\s\-']/g, '');
+                        break;
+                    case 'email':
+                        // Validation email basique
+                        if (value && !this.validateEmail(value)) {
+                            input.style.borderColor = '#ff4757';
+                        } else {
+                            input.style.borderColor = '#ffffff';
+                        }
+                        break;
+                    case 'tel':
+                        // Validation téléphone : seulement chiffres, +, -, espaces, parenthèses
+                        input.value = value.replace(/[^\d+\-\s()]/g, '');
+                        if (value && !this.validatePhone(value)) {
+                            input.style.borderColor = '#ff4757';
+                        } else {
+                            input.style.borderColor = '#ffffff';
+                        }
+                        break;
+                }
+            }
+
+            handleFormSubmission() {
+                const clientData = this.getFormData();
+                if (!clientData) return;
+
+                this.saveClientData(clientData);
+                this.showSuccess('Inscription réussie !');
+                this.processPayment(clientData);
+                this.resetForm();
+            }
+
+            getFormData() {
+                const nom1 = document.getElementById('user').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+
+                // Validation des champs requis
+                if (!this.validateRequired([nom1, email, phone])) {
+                    this.showError('Veuillez remplir tous les champs obligatoires');
+                    return null;
+                }
+
+                if (!this.validateEmail(email)) {
+                    this.showError('Veuillez entrer un email valide');
+                    return null;
+                }
+
+                if (!this.validatePhone(phone)) {
+                    this.showError('Veuillez entrer un numéro de téléphone valide');
+                    return null;
+                }
+
+                if (!this.validateName(nom1)) {
+                    this.showError('Le nom contient des caractères non autorisés');
+                    return null;
+                }
+
+                return {
+                    nom1: nom1,
+                    email: email,
+                    phone: phone,
+                    type: 'unite',
+                    timestamp: new Date().toISOString(),
+                    page: 'unite',
+                    ip: this.getUserIP(),
+                    userAgent: navigator.userAgent,
+                    id: this.generateUniqueId(),
+                    paiement: 'En attente'
+                };
+            }
+
+            validateRequired(fields) {
+                return fields.every(field => field !== '');
+            }
+
+            validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            validatePhone(phone) {
+                const cleaned = phone.replace(/\s/g, '');
+                const re = /^[\+]?[0-9\-\s\(\)]{10,}$/;
+                return re.test(cleaned) && cleaned.replace(/\D/g, '').length >= 8;
+            }
+
+            validateName(name) {
+                const re = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+                return re.test(name);
+            }
+
+            generateUniqueId() {
+                return 'UNI_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            getUserIP() {
+                // En production, utiliser un service d'API IP
+                return 'local';
+            }
+
+            saveClientData(clientData) {
+                try {
+                    // Sauvegarde sécurisée dans l'espace admin
+                    this.saveToAdminStorage(clientData);
+
+                    // Sauvegarde locale de backup
+                    this.saveToLocalBackup(clientData);
+
+                    console.log('✅ Données enregistrées de manière sécurisée');
+                    return true;
+                } catch (error) {
+                    console.error('❌ Erreur sauvegarde:', error);
+                    this.showError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
+                    return false;
+                }
+            }
+
+            saveToAdminStorage(clientData) {
+                try {
+                    // Récupérer les données existantes (chiffrées)
+                    const encryptedData = localStorage.getItem('bielleterie_clients_secure');
+                    let clients = [];
+
+                    if (encryptedData) {
+                        // Déchiffrer les données
+                        clients = JSON.parse(decodeURIComponent(escape(atob(encryptedData)))) || [];
+                    }
+
+                    // Vérifier les doublons
+                    const isDuplicate = clients.some(client =>
+                        client.email === clientData.email || client.phone === clientData.phone
+                    );
+
+                    if (!isDuplicate) {
+                        clients.push(clientData);
+
+                        // Chiffrer et sauvegarder
+                        const newEncryptedData = btoa(unescape(encodeURIComponent(JSON.stringify(clients))));
+                        localStorage.setItem('bielleterie_clients_secure', newEncryptedData);
+                    } else {
+                        console.log('⚠️ Client déjà enregistré');
+                    }
+                } catch (error) {
+                    console.error('Erreur sauvegarde admin:', error);
+                    throw error;
+                }
+            }
+
+            saveToLocalBackup(clientData) {
+                try {
+                    let backupData = JSON.parse(localStorage.getItem('bielleterie_backup_unite')) || [];
+                    backupData.push(clientData);
+
+                    // Garder seulement les 50 derniers enregistrements
+                    if (backupData.length > 50) {
+                        backupData = backupData.slice(-50);
+                    }
+
+                    localStorage.setItem('bielleterie_backup_unite', JSON.stringify(backupData));
+                } catch (error) {
+                    console.error('Erreur sauvegarde backup:', error);
+                }
+            }
+
+            processPayment(clientData) {
+                const paymentWindow = document.createElement('div');
+                paymentWindow.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.95);
+                    padding: 30px;
+                    border-radius: 15px;
+                    z-index: 10000;
+                    color: white;
+                    text-align: center;
+                    min-width: 300px;
+                    box-shadow: 0 0 50px rgba(255,107,107,0.3);
+                    border: 2px solid #ff6b6b;
+                    backdrop-filter: blur(10px);
+                `;
+
+                paymentWindow.innerHTML = `
+                    <h3 style="color: #ff6b6b; margin-bottom: 20px;">💳 Paiement Unité</h3>
+                    <p><strong>${clientData.nom1}</strong></p>
+                    <p>Email: ${clientData.email}</p>
+                    <p>Téléphone: ${clientData.phone}</p>
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(255,107,107,0.1); border-radius: 10px;">
+                        <p style="font-size: 24px; font-weight: bold; color: #ff6b6b;">${this.amount} FCFA</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <button onclick="window.billetSystem.completePayment('success', '${clientData.id}')" 
+                                style="background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                            ✅ Paiement Réussi
+                        </button>
+                        <button onclick="window.billetSystem.completePayment('failed', '${clientData.id}')" 
+                                style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                            ❌ Échec Paiement
+                        </button>
+                    </div>
+                    
+                    <p style="font-size: 12px; color: #ccc; margin-top: 20px;">
+                        ⚠️ Simulation - Intégrez un vrai processeur de paiement
+                    </p>
+                `;
+
+                document.body.appendChild(paymentWindow);
+
+                // Désactiver le bouton de soumission
+                document.getElementById('submitBtn').disabled = true;
+            }
+
+            completePayment(status, clientId) {
+                try {
+                    // Mettre à jour le statut de paiement
+                    this.updatePaymentStatus(clientId, status);
+
+                    // Fermer la fenêtre de paiement
+                    document.querySelectorAll('div').forEach(div => {
+                        if (div.innerHTML.includes('💳 Paiement Unité')) {
+                            div.remove();
+                        }
+                    });
+
+                    // Réactiver le bouton
+                    document.getElementById('submitBtn').disabled = false;
+
+                    if (status === 'success') {
+                        this.showSuccess('Paiement confirmé ! Votre billet est validé.');
+                        this.trackConversion('unite', this.amount);
+                    } else {
+                        this.showError('Paiement échoué. Veuillez réessayer.');
+                    }
+                } catch (error) {
+                    console.error('Erreur paiement:', error);
+                    this.showError('Erreur lors du traitement du paiement.');
+                }
+            }
+
+            updatePaymentStatus(clientId, status) {
+                try {
+                    const encryptedData = localStorage.getItem('bielleterie_clients_secure');
+                    if (encryptedData) {
+                        let clients = JSON.parse(decodeURIComponent(escape(atob(encryptedData)))) || [];
+
+                        const clientIndex = clients.findIndex(client => client.id === clientId);
+                        if (clientIndex !== -1) {
+                            clients[clientIndex].paiement = status === 'success' ? 'Payé' : 'Échec';
+                            clients[clientIndex].paymentDate = new Date().toISOString();
+
+                            const newEncryptedData = btoa(unescape(encodeURIComponent(JSON.stringify(clients))));
+                            localStorage.setItem('bielleterie_clients_secure', newEncryptedData);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur mise à jour paiement:', error);
+                }
+            }
+
+            trackConversion(type, amount) {
+                try {
+                    const conversion = {
+                        type: type,
+                        amount: amount,
+                        timestamp: new Date().toISOString(),
+                        page: 'unite'
+                    };
+
+                    let conversions = JSON.parse(localStorage.getItem('bielleterie_conversions')) || [];
+                    conversions.push(conversion);
+
+                    // Garder seulement les 100 dernières conversions
+                    if (conversions.length > 100) {
+                        conversions = conversions.slice(-100);
+                    }
+
+                    localStorage.setItem('bielleterie_conversions', JSON.stringify(conversions));
+                } catch (error) {
+                    console.error('Erreur tracking conversion:', error);
+                }
+            }
+
+            showSuccess(message) {
+                this.showNotification(message, 'success');
+            }
+
+            showError(message) {
+                this.showNotification(message, 'error');
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.style.display = 'block';
+
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
+            }
+
+            resetForm() {
+                document.getElementById('user').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('phone').value = '';
+            }
+
+            setupSecurity() {
+                this.disableDevTools();
+                this.protectContextMenu();
+                this.preventCopyPaste();
+            }
+
+            disableDevTools() {
+                document.addEventListener('keydown', (e) => {
+                    if (
+                        e.key === 'F12' ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                        (e.ctrlKey && e.key === 'u') ||
+                        (e.ctrlKey && e.key === 's')
+                    ) {
+                        e.preventDefault();
+                        this.showError('Action non autorisée');
+                        return false;
+                    }
+                });
+            }
+
+            protectContextMenu() {
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    this.showError('Action non autorisée');
+                    return false;
+                });
+            }
+
+            preventCopyPaste() {
+                document.addEventListener('copy', (e) => {
+                    e.preventDefault();
+                    this.showError('Copie non autorisée');
+                });
+
+                document.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    this.showError('Collage non autorisé');
+                });
+            }
+        }
+
+        // Initialisation
+        window.billetSystem = new BilletSystemUnite();
     </script>
 </body>
 

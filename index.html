@@ -46,6 +46,18 @@
         z-index: -1;
     }
 
+    .flag {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        top: 220px;
+        align-items: center;
+    }
+
+    .congo {
+        font-size: 60px;
+    }
+
     /* Bouton info */
     .info-button {
         width: 50px;
@@ -96,9 +108,11 @@
         height: auto;
         z-index: 999;
         border-radius: 50%;
-        padding: 3px;
+        padding: px;
         mix-blend-mode: multiply;
+        z-index: 1000;
         background: linear-gradient(to right, #ffffff44, #ffffffac);
+        backdrop-filter: blur(30px);
     }
 
     /* Section principale */
@@ -554,9 +568,13 @@
     <img src="logo.jpg" class="logo" alt="Logo">
     <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
 
+    <div class="flag">
+        <p class="congo">🇨🇬</p>
+    </div>
+
     <div class="billet">
         <h1>Bielleterie ouverte</h1>
-        <p>Bienvenue sur la plateforme de vente de biellet du Gala</p>
+        <p>Bienvenue sur la plateforme de vente de biellets du Gala +242</p>
 
         <div class="buttons-container">
 
@@ -575,29 +593,32 @@
             <ul>
                 <li>Date : 03 Janvier 2026</li>
                 <li>Lieu : Moscou</li>
-                <li>Standard : <span>3.000</span></li>
+                <li>Adress: <span>Ulterieurement</span></li>
+                <li>Single : <span>3.000</span></li>
                 <li>Couple : <span>5.000</span></li>
-                <li>Heure : 20h:00</li>
-                <li>Dress code : Élégant</li>
+                <li>Heure : 21h:00</li>
+                <li>Dress code : Audace & Élégant</li>
             </ul>
             <p>Pour toute question, n'hésitez pas à nous contacter via nos contacts.</p>
 
             <div class="wrapper">
                 <ul>
                     <li class="icon whatsapp">
-                        <a href="https://wa.me/" aria-label="WhatsApp" rel="noopener noreferrer" target="_blank">
+                        <a href="https://wa.me/+79777047762" aria-label="WhatsApp" rel="noopener noreferrer"
+                            target="_blank">
                             <i class="fa-brands fa-whatsapp"></i>
                         </a>
                     </li>
 
                     <li class="icon telegram">
-                        <a href="https://t.me/+" aria-label="Telegram" rel="noopener noreferrer" target="_blank">
+                        <a href="https://t.me/+79777047762" aria-label="Telegram" rel="noopener noreferrer"
+                            target="_blank">
                             <i class="fa-brands fa-telegram"></i>
                         </a>
                     </li>
 
                     <li class="icon telephone">
-                        <a href="tel:+" aria-label="Téléphone" rel="noopener">
+                        <a href="tel:+79777047762" aria-label="Téléphone" rel="noopener">
                             <i class="fa fa-phone" aria-hidden="true"></i>
                         </a>
                     </li>
@@ -607,10 +628,10 @@
                                 class="fa-brands fa-facebook-f"></i></a>
                     </li>
 
-                    <li class="icon youtube">
+                    <!-- <li class="icon youtube">
                         <a href="" aria-label="YouTube" rel="noopener noreferrer" target="_blank"><i
                                 class="fab fa-youtube"></i></a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </div>
