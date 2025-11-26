@@ -575,6 +575,73 @@
             font-size: 0.8em;
             animation: pulse 2s infinite;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #3d3d3d;
+            border: 1px solid #555;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -583,6 +650,54 @@
     <div class="loading" id="loading">
         <div class="spinner"></div>
         <div>Chargement des données...</div>
+    </div>
+
+    <!-- Modal d'édition client -->
+    <div class="modal" id="editClientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Modifier le Client</h3>
+                <button class="close-modal" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editClientForm">
+                <input type="hidden" id="editClientId">
+                <div class="form-group">
+                    <label for="editNom1">Nom 1:</label>
+                    <input type="text" id="editNom1" required>
+                </div>
+                <div class="form-group">
+                    <label for="editNom2">Nom 2:</label>
+                    <input type="text" id="editNom2">
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail">
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Téléphone:</label>
+                    <input type="tel" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label for="editType">Type:</label>
+                    <select id="editType" required>
+                        <option value="unite">Single</option>
+                        <option value="couple">Couple</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPaiement">Statut Paiement:</label>
+                    <select id="editPaiement" required>
+                        <option value="En attente">En attente</option>
+                        <option value="Payé">Payé</option>
+                        <option value="Échec">Échec</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeEditModal()">Annuler</button>
+                    <button type="submit" class="btn btn-success">Enregistrer</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div class="admin-container">
@@ -1123,7 +1238,7 @@
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
 
-        // ==================== FONCTIONS EXISTANTES (raccourcies) ====================
+        // ==================== FONCTIONS EXISTANTES AMÉLIORÉES ====================
         function setupRealTimeSync() {
             if (syncListenerActive) return;
             syncListenerActive = true;
@@ -1175,9 +1290,38 @@
         }
 
         function updateDetailedStats(clients) {
-            // Implémentation simplifiée pour gagner de la place
+            const today = new Date();
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+            const todayClients = clients.filter(c => new Date(c.timestamp).toDateString() === today.toDateString());
+            const weekClients = clients.filter(c => new Date(c.timestamp) >= weekStart);
+            const monthClients = clients.filter(c => new Date(c.timestamp) >= monthStart);
+            const paidClients = clients.filter(c => c.paiement === 'Payé');
+            const pendingClients = clients.filter(c => c.paiement === 'En attente');
+
+            const totalRevenue = paidClients.reduce((sum, c) => sum + (c.type === 'couple' ? 5000 : 3000), 0);
+            const todayRevenue = todayClients.filter(c => c.paiement === 'Payé')
+                .reduce((sum, c) => sum + (c.type === 'couple' ? 5000 : 3000), 0);
+            const potentialRevenue = pendingClients.reduce((sum, c) => sum + (c.type === 'couple' ? 5000 : 3000), 0);
+
             document.getElementById('statTotalClients').textContent = clients.length;
-            // ... autres updates
+            document.getElementById('statTodayClients').textContent = todayClients.length;
+            document.getElementById('statWeekClients').textContent = weekClients.length;
+            document.getElementById('statMonthClients').textContent = monthClients.length;
+
+            document.getElementById('statTotalRevenue').textContent = totalRevenue.toLocaleString() + ' FCFA';
+            document.getElementById('statTodayRevenue').textContent = todayRevenue.toLocaleString() + ' FCFA';
+            document.getElementById('statAverageRevenue').textContent = clients.length > 0 ?
+                Math.round(totalRevenue / clients.length).toLocaleString() + ' FCFA' : '0 FCFA';
+            document.getElementById('statPotentialRevenue').textContent = potentialRevenue.toLocaleString() + ' FCFA';
+
+            document.getElementById('statCouples').textContent = clients.filter(c => c.type === 'couple').length;
+            document.getElementById('statUnites').textContent = clients.filter(c => c.type === 'unite').length;
+            document.getElementById('statConversionRate').textContent = clients.length > 0 ?
+                Math.round((paidClients.length / clients.length) * 100) + '%' : '0%';
+            document.getElementById('statPaid').textContent = paidClients.length;
         }
 
         function applyFilters() {
@@ -1211,6 +1355,435 @@
 
             currentFilteredClients = filtered;
             populateTable(filtered);
+        }
+
+        // ==================== GESTION DES CLIENTS ====================
+        async function editClient(clientId) {
+            try {
+                const client = await billetDB.getClient(clientId);
+                if (!client) {
+                    showNotification('Client non trouvé', 'error');
+                    return;
+                }
+
+                document.getElementById('editClientId').value = client.id;
+                document.getElementById('editNom1').value = client.nom1 || '';
+                document.getElementById('editNom2').value = client.nom2 || '';
+                document.getElementById('editEmail').value = client.email || '';
+                document.getElementById('editPhone').value = client.phone || '';
+                document.getElementById('editType').value = client.type || 'unite';
+                document.getElementById('editPaiement').value = client.paiement || 'En attente';
+
+                document.getElementById('editClientModal').style.display = 'flex';
+            } catch (error) {
+                console.error('Erreur édition client:', error);
+                showNotification('Erreur lors du chargement du client', 'error');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editClientModal').style.display = 'none';
+            document.getElementById('editClientForm').reset();
+        }
+
+        document.getElementById('editClientForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const clientId = document.getElementById('editClientId').value;
+            const updatedClient = {
+                nom1: document.getElementById('editNom1').value,
+                nom2: document.getElementById('editNom2').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value,
+                type: document.getElementById('editType').value,
+                paiement: document.getElementById('editPaiement').value,
+                lastUpdated: new Date().toISOString()
+            };
+
+            try {
+                // Récupérer le client existant
+                const existingClient = await billetDB.getClient(clientId);
+                if (!existingClient) {
+                    showNotification('Client non trouvé', 'error');
+                    return;
+                }
+
+                // Fusionner les modifications
+                const mergedClient = { ...existingClient, ...updatedClient };
+
+                // Sauvegarder les modifications
+                await billetDB.saveClient(mergedClient);
+
+                showNotification('Client modifié avec succès', 'success');
+                closeEditModal();
+                await loadDashboard();
+
+            } catch (error) {
+                console.error('Erreur modification client:', error);
+                showNotification('Erreur lors de la modification', 'error');
+            }
+        });
+
+        async function deleteClient(clientId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+                return;
+            }
+
+            try {
+                await billetDB.deleteClient(clientId);
+                showNotification('Client supprimé avec succès', 'success');
+                await loadDashboard();
+            } catch (error) {
+                console.error('Erreur suppression client:', error);
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        }
+
+        function viewClientDetails(clientId) {
+            const client = allClients.find(c => c.id === clientId);
+            if (!client) {
+                showNotification('Client non trouvé', 'error');
+                return;
+            }
+
+            const details = `
+DÉTAILS DU CLIENT:
+
+👤 Informations Personnelles:
+• Nom 1: ${client.nom1 || 'Non renseigné'}
+• Nom 2: ${client.nom2 || 'Non renseigné'}
+• Email: ${client.email || 'Non renseigné'}
+• Téléphone: ${client.phone || 'Non renseigné'}
+
+🎫 Informations Billet:
+• Type: ${client.type === 'couple' ? '👫 Couple' : '👤 Single'}
+• Statut Paiement: ${client.paiement || 'En attente'}
+• Date d'inscription: ${new Date(client.timestamp).toLocaleString()}
+
+📱 Informations Technique:
+• Appareil: ${client.deviceInfo?.mobile ? '📱 Mobile' : '💻 Desktop'}
+• ID Appareil: ${client.deviceId || 'Inconnu'}
+• Synchronisé: ${client.synced ? '✅ Oui' : '❌ Non'}
+• Dernière modification: ${client.lastUpdated ? new Date(client.lastUpdated).toLocaleString() : 'Inconnue'}
+
+${client.page ? `🌐 Page d'origine: ${client.page}` : ''}
+            `.trim();
+
+            alert(details);
+        }
+
+        // ==================== EXPORT ET IMPORT ====================
+        async function exportToCSV() {
+            try {
+                const clients = await billetDB.getAllClients();
+                if (clients.length === 0) {
+                    showNotification('Aucune donnée à exporter', 'warning');
+                    return;
+                }
+
+                const headers = ['Date', 'Nom1', 'Nom2', 'Email', 'Téléphone', 'Type', 'Paiement', 'Appareil'];
+                const csvContent = [
+                    headers.join(','),
+                    ...clients.map(client => [
+                        new Date(client.timestamp).toLocaleDateString(),
+                        `"${(client.nom1 || '').replace(/"/g, '""')}"`,
+                        `"${(client.nom2 || '').replace(/"/g, '""')}"`,
+                        `"${(client.email || '').replace(/"/g, '""')}"`,
+                        `"${(client.phone || '').replace(/"/g, '""')}"`,
+                        client.type,
+                        client.paiement,
+                        client.deviceInfo?.mobile ? 'Mobile' : 'Desktop'
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `bielleterie_clients_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showNotification(`Export CSV réussi: ${clients.length} clients`, 'success');
+            } catch (error) {
+                console.error('Erreur export CSV:', error);
+                showNotification('Erreur lors de l\'export CSV', 'error');
+            }
+        }
+
+        async function exportToJSON() {
+            try {
+                const data = await billetDB.exportToJSON();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `bielleterie_backup_${new Date().toISOString().split('T')[0]}.json`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showNotification(`Export JSON réussi: ${data.clients.length} clients`, 'success');
+            } catch (error) {
+                console.error('Erreur export JSON:', error);
+                showNotification('Erreur lors de l\'export JSON', 'error');
+            }
+        }
+
+        async function importFromJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    showLoading(true);
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+
+                    if (!data.clients || !Array.isArray(data.clients)) {
+                        throw new Error('Format de fichier invalide');
+                    }
+
+                    const result = await billetDB.importFromJSON(data);
+                    showNotification(`Import réussi: ${result.success} clients importés`, 'success');
+                    await loadDashboard();
+                } catch (error) {
+                    console.error('Erreur import:', error);
+                    showNotification('Erreur lors de l\'import: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            };
+            input.click();
+        }
+
+        // ==================== GESTION DES SAUVEGARDES ====================
+        async function showBackupManager() {
+            const section = document.getElementById('backupSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            if (section.style.display === 'block') {
+                await loadBackups();
+            }
+        }
+
+        async function loadBackups() {
+            try {
+                const backups = await billetDB.getAllBackups();
+                const backupList = document.getElementById('backupList');
+
+                if (backups.length === 0) {
+                    backupList.innerHTML = '<div class="no-data">Aucune sauvegarde trouvée</div>';
+                    return;
+                }
+
+                backupList.innerHTML = backups.reverse().map(backup => `
+                    <div class="backup-item">
+                        <div class="backup-info">
+                            <div class="backup-date">${new Date(backup.timestamp).toLocaleString()}</div>
+                            <div class="backup-stats">
+                                ${backup.clientCount} clients • ${backup.paymentCount || 0} paiements • ${backup.type || 'manuel'}
+                            </div>
+                        </div>
+                        <div class="backup-actions">
+                            <button class="btn btn-success btn-small" onclick="restoreBackup('${backup.id}')" title="Restaurer">🔄</button>
+                            <button class="btn btn-info btn-small" onclick="downloadBackup('${backup.id}')" title="Télécharger">📥</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteBackup('${backup.id}')" title="Supprimer">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Erreur chargement sauvegardes:', error);
+                showNotification('Erreur lors du chargement des sauvegardes', 'error');
+            }
+        }
+
+        async function createBackup() {
+            try {
+                showLoading(true);
+                const backup = await billetDB.createBackup();
+                showNotification(`Sauvegarde créée: ${backup.clientCount} clients`, 'success');
+                await loadBackups();
+            } catch (error) {
+                console.error('Erreur création sauvegarde:', error);
+                showNotification('Erreur lors de la création de la sauvegarde', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function restoreBackup(backupId) {
+            if (!confirm('Êtes-vous sûr de vouloir restaurer cette sauvegarde ? Les données actuelles seront écrasées.')) {
+                return;
+            }
+
+            try {
+                showLoading(true);
+                const result = await billetDB.restoreBackup(backupId);
+                showNotification(`Sauvegarde restaurée: ${result.success} clients`, 'success');
+                await loadDashboard();
+                await loadBackups();
+            } catch (error) {
+                console.error('Erreur restauration:', error);
+                showNotification('Erreur lors de la restauration', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function deleteBackup(backupId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette sauvegarde ?')) {
+                return;
+            }
+
+            try {
+                await billetDB.deleteBackup(backupId);
+                showNotification('Sauvegarde supprimée', 'success');
+                await loadBackups();
+            } catch (error) {
+                console.error('Erreur suppression sauvegarde:', error);
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        }
+
+        async function downloadBackup(backupId) {
+            try {
+                const backup = await new Promise((resolve, reject) => {
+                    const transaction = billetDB.db.transaction(["backups"], "readonly");
+                    const store = transaction.objectStore("backups");
+                    const request = store.get(backupId);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                });
+
+                if (!backup) {
+                    throw new Error('Sauvegarde non trouvée');
+                }
+
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `backup_${backupId}_${new Date(backup.timestamp).toISOString().split('T')[0]}.json`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showNotification('Sauvegarde téléchargée', 'success');
+            } catch (error) {
+                console.error('Erreur téléchargement sauvegarde:', error);
+                showNotification('Erreur lors du téléchargement', 'error');
+            }
+        }
+
+        // ==================== GESTION DES DONNÉES ====================
+        function showClearConfirmation() {
+            document.getElementById('clearConfirmation').style.display = 'block';
+        }
+
+        function hideClearConfirmation() {
+            document.getElementById('clearConfirmation').style.display = 'none';
+        }
+
+        async function clearAllData() {
+            try {
+                showLoading(true);
+                await billetDB.clearAllData();
+                showNotification('Toutes les données ont été supprimées', 'success');
+                hideClearConfirmation();
+                await loadDashboard();
+            } catch (error) {
+                console.error('Erreur suppression données:', error);
+                showNotification('Erreur lors de la suppression des données', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function resetDatabase() {
+            if (!confirm('Êtes-vous sûr de vouloir réinitialiser complètement la base de données ? Cette action est irréversible.')) {
+                return;
+            }
+
+            try {
+                showLoading(true);
+                await billetDB.resetDatabase();
+                showNotification('Base de données réinitialisée', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } catch (error) {
+                console.error('Erreur réinitialisation BDD:', error);
+                showNotification('Erreur lors de la réinitialisation', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ==================== DIAGNOSTIC ET DEBUG ====================
+        async function runDiagnostic() {
+            try {
+                showLoading(true);
+                const diagnostic = await billetDB.diagnostic();
+
+                let message = `🔍 DIAGNOSTIC COMPLET:\n\n`;
+                message += `📊 Données:\n`;
+                message += `• Clients: ${diagnostic.totalClients}\n`;
+                message += `• Synchronisés: ${diagnostic.syncedClients}\n`;
+                message += `• Non synchronisés: ${diagnostic.unsyncedClients}\n`;
+                message += `• Paiements: ${diagnostic.totalPayments}\n`;
+                message += `• Sauvegardes: ${diagnostic.totalBackups}\n\n`;
+
+                message += `⚙️ Système:\n`;
+                message += `• BDD Initialisée: ${diagnostic.dbInitialized ? '✅' : '❌'}\n`;
+                message += `• Version BDD: ${diagnostic.dbVersion}\n`;
+                message += `• ID Appareil: ${diagnostic.deviceId}\n`;
+                message += `• Chiffrement: ${diagnostic.encryption ? '✅' : '❌'}\n\n`;
+
+                message += `💾 Sauvegarde:\n`;
+                message += `• Fallback: ${diagnostic.fallbackClients} clients\n`;
+                message += `• Dernière sauvegarde: ${diagnostic.lastBackup ? new Date(diagnostic.lastBackup).toLocaleString() : 'Jamais'}\n`;
+
+                alert(message);
+            } catch (error) {
+                console.error('Erreur diagnostic:', error);
+                showNotification('Erreur lors du diagnostic', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function debugDatabase() {
+            try {
+                const diagnostic = await billetDB.diagnostic();
+                document.getElementById('debugInfo').textContent = JSON.stringify(diagnostic, null, 2);
+                document.getElementById('debugPanel').style.display = 'block';
+            } catch (error) {
+                console.error('Erreur debug:', error);
+                showNotification('Erreur lors du debug', 'error');
+            }
+        }
+
+        function addDebugLog(message) {
+            debugLogs.push(`${new Date().toLocaleTimeString()}: ${message}`);
+            if (debugLogs.length > 50) {
+                debugLogs = debugLogs.slice(-50);
+            }
+
+            if (document.getElementById('debugPanel').style.display === 'block') {
+                document.getElementById('debugInfo').textContent = debugLogs.join('\n');
+            }
         }
 
         // ==================== UTILITAIRES ====================
@@ -1268,6 +1841,7 @@
         async function autoRepairData() {
             showLoading(true);
             try {
+                await billetDB.restoreFromBackupIfNeeded();
                 await loadDashboard();
                 showNotification('Données vérifiées et réparées si nécessaire', 'success');
             } catch (error) {
@@ -1296,29 +1870,10 @@
                     loadDashboard();
                 }
             }, 120000);
+
+            // Recherche en temps réel
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
         });
-
-        // Garder les autres fonctions existantes mais raccourcies pour gagner de la place
-        async function deleteClient(clientId) {
-            if (confirm('Supprimer ce client ?')) {
-                try {
-                    await billetDB.deleteClient(clientId);
-                    showNotification('Client supprimé', 'success');
-                    await loadDashboard();
-                } catch (error) {
-                    showNotification('Erreur suppression', 'error');
-                }
-            }
-        }
-
-        function viewClientDetails(clientId) {
-            const client = allClients.find(c => c.id === clientId);
-            if (client) {
-                alert(`DÉTAILS CLIENT:\n\nNom: ${client.nom1}\nEmail: ${client.email}\nTéléphone: ${client.phone}\nType: ${client.type}\nPaiement: ${client.paiement}\nAppareil: ${client.deviceInfo?.mobile ? 'Mobile' : 'Desktop'}`);
-            }
-        }
-
-        // ... autres fonctions existantes (export, backup, etc.) conservées mais non répétées pour économiser de l'espace
     </script>
 </body>
 

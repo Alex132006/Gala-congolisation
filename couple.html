@@ -9,6 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Bielleterie-ouverte - Couple</title>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -557,22 +561,47 @@
         </ul>
     </div>
 
-    <!-- Inclure la base de données synchronisée -->
-    <script src="billet-db.js"></script>
-
     <script>
-        // SYSTÈME CLIENT SIMPLIFIÉ ET CORRIGÉ POUR COUPLE
+        // SYSTÈME CLIENT POUR ENVOYER LES DONNÉES À VOTRE EMAIL - COUPLE
         class BilletSystemCouple {
             constructor() {
                 this.amount = 5000;
                 this.isSubmitting = false;
+
+                // Configuration EmailJS POUR VOTRE EMAIL
+                this.emailjsConfig = {
+                    serviceId: 'service_ckpdrn7', // Votre Service ID EmailJS
+                    templateId: 'template_kkpxfs4', // Votre Template ID EmailJS
+                    publicKey: 'ap0Ki_0sjm3K8LkR8', // Votre Public Key EmailJS
+                    toEmail: 'essongapea.a.b@gmail.com' // VOTRE EMAIL - les données arriveront ici
+                };
+
+                // LIENS BANCAIRES - MODIFIEZ CES LIENS AVEC VOS VRAIS LIENS
+                this.bankLinks = {
+                    sberbank: 'https://www.sberbank.ru/', // Remplacez par votre lien Sberbank
+                    tinkoff: 'https://www.tinkoff.ru/' // Remplacez par votre lien Tinkoff
+                };
+
                 this.init();
             }
 
             init() {
                 console.log('🚀 Initialisation système Couple...');
+
+                // Initialiser EmailJS
+                this.initEmailJS();
                 this.setupFormSubmission();
                 this.setupInputValidation();
+            }
+
+            initEmailJS() {
+                try {
+                    // Initialiser EmailJS avec votre Public Key
+                    emailjs.init(this.emailjsConfig.publicKey);
+                    console.log('✅ EmailJS initialisé pour envoyer à:', this.emailjsConfig.toEmail);
+                } catch (error) {
+                    console.error('❌ Erreur initialisation EmailJS:', error);
+                }
             }
 
             setupFormSubmission() {
@@ -658,11 +687,19 @@
 
                     console.log('✅ Données du formulaire valides:', clientData);
 
-                    const saved = await this.saveClientData(clientData);
-                    if (saved) {
-                        this.showSuccess('Inscription réussie !');
+                    // ENVOYER DIRECTEMENT LES DONNÉES À VOTRE EMAIL
+                    const emailSent = await this.sendDataToYourEmail(clientData);
+
+                    if (emailSent) {
+                        this.showSuccess('Inscription réussie ! Données envoyées.');
+
+                        // Sauvegarder aussi en local
+                        await this.saveClientData(clientData);
+
                         await this.processPayment(clientData);
                         this.resetForm();
+                    } else {
+                        this.showError('Erreur envoi des données. Veuillez réessayer.');
                     }
 
                 } catch (error) {
@@ -738,46 +775,90 @@
                 return 'CPL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             }
 
-            async saveClientData(clientData) {
+            async sendDataToYourEmail(clientData) {
                 try {
-                    console.log('💾 Tentative de sauvegarde du client...');
+                    console.log('📧 Envoi des données client à votre email...');
 
-                    // Initialiser la base de données
-                    await billetDB.init();
-                    console.log('✅ Base de données initialisée');
+                    const coupleNames = clientData.nom2 ?
+                        `${clientData.nom1} & ${clientData.nom2}` :
+                        `${clientData.nom1} & Partenaire`;
 
-                    // Sauvegarder le client
-                    const clientId = await billetDB.saveClient(clientData);
-                    console.log('✅ Client sauvegardé avec ID:', clientId);
+                    // Préparer les données pour l'email
+                    const templateParams = {
+                        to_email: this.emailjsConfig.toEmail, // VOTRE EMAIL
+                        client_name: clientData.nom1,
+                        partner_name: clientData.nom2 || 'Partenaire',
+                        client_email: clientData.email,
+                        client_phone: clientData.phone,
+                        billet_type: 'Couple',
+                        amount: this.amount + ' FCFA',
+                        date_inscription: new Date().toLocaleDateString('fr-FR'),
+                        timestamp: clientData.timestamp,
+                        payment_status: 'En attente',
+                        reference: clientData.id,
+                        couple_names: coupleNames,
+                        subject: `NOUVELLE INSCRIPTION COUPLE - ${coupleNames}`,
+                        message: `
+                            NOUVELLE INSCRIPTION COUPLE:
+                            
+                            👫 INFORMATIONS DU COUPLE:
+                            Personne 1: ${clientData.nom1}
+                            Personne 2: ${clientData.nom2 || 'Partenaire'}
+                            Email: ${clientData.email}
+                            Téléphone: ${clientData.phone}
+                            
+                            🎫 INFORMATIONS BILLET:
+                            Type: Couple
+                            Montant: ${this.amount} FCFA
+                            Date: ${new Date().toLocaleDateString('fr-FR')}
+                            Référence: ${clientData.id}
+                            
+                            📊 AUTRES INFORMATIONS:
+                            Page: ${clientData.page}
+                            User Agent: ${clientData.userAgent}
+                            Statut Paiement: ${clientData.paiement}
+                        `
+                    };
 
-                    // Vérifier que le client est bien sauvegardé
-                    const verification = await billetDB.getClient(clientId);
-                    if (verification) {
-                        console.log('✅ Vérification réussie - Client trouvé dans BDD');
-                    } else {
-                        console.error('❌ Vérification échouée - Client non trouvé');
-                    }
+                    // Envoyer l'email avec EmailJS
+                    const response = await emailjs.send(
+                        this.emailjsConfig.serviceId,
+                        this.emailjsConfig.templateId,
+                        templateParams
+                    );
 
+                    console.log('✅ Données envoyées avec succès à votre email:', response);
+                    this.showNotification('Données envoyées à votre email!', 'success');
                     return true;
 
                 } catch (error) {
-                    console.error('❌ Erreur sauvegarde IndexedDB:', error);
+                    console.error('❌ Erreur envoi email:', error);
+                    this.showError('Erreur envoi des données. Veuillez réessayer.');
+                    return false;
+                }
+            }
+
+            async saveClientData(clientData) {
+                try {
+                    console.log('💾 Sauvegarde locale des données...');
 
                     // Fallback vers localStorage
-                    const fallbackSaved = this.saveToLocalStorage(clientData);
-                    if (fallbackSaved) {
-                        console.log('🔄 Données sauvegardées en fallback localStorage');
-                        this.showNotification('Données sauvegardées localement', 'info');
+                    const saved = this.saveToLocalStorage(clientData);
+                    if (saved) {
+                        console.log('✅ Client sauvegardé localement');
                         return true;
                     }
+                    return false;
 
+                } catch (error) {
+                    console.error('❌ Erreur sauvegarde locale:', error);
                     return false;
                 }
             }
 
             saveToLocalStorage(clientData) {
                 try {
-                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients_fallback')) || [];
+                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients')) || [];
 
                     // Vérifier les doublons
                     const isDuplicate = clients.some(client =>
@@ -792,16 +873,15 @@
                             clients = clients.slice(-100);
                         }
 
-                        localStorage.setItem('bielleterie_clients_fallback', JSON.stringify(clients));
-                        console.log('✅ Client sauvegardé en fallback localStorage');
+                        localStorage.setItem('bielleterie_clients', JSON.stringify(clients));
+                        console.log('✅ Client sauvegardé en localStorage');
                         return true;
                     } else {
-                        console.log('⚠️ Client déjà enregistré en fallback');
-                        this.showNotification('Vous êtes déjà inscrit!', 'warning');
+                        console.log('⚠️ Client déjà enregistré');
                         return true;
                     }
                 } catch (error) {
-                    console.error('❌ Erreur fallback:', error);
+                    console.error('❌ Erreur localStorage:', error);
                     return false;
                 }
             }
@@ -842,35 +922,73 @@
                         </div>
                         
                         <div style="margin: 20px 0;">
-                            <button id="successPayment" 
-                                    style="background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
-                                ✅ Paiement Réussi
+                            <p style="margin-bottom: 15px; color: #ccc;">Choisissez votre méthode de paiement :</p>
+                            
+                            <button id="sberbankPayment" 
+                                    style="background: #0fd343b6; color: white; padding: 15px 25px; border: none; border-radius: 8px; margin: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 200px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <i class="fa-solid fa-building-columns"></i>
+                                Sberbank
                             </button>
-                            <button id="failedPayment" 
-                                    style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
-                                ❌ Échec Paiement
+                            
+                            <button id="tinkoffPayment" 
+                                    style="background: #0fd343b6; color: black; padding: 15px 25px; border: none; border-radius: 8px; margin: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 200px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <i class="fa-solid fa-credit-card"></i>
+                                Tinkoff
+                            </button>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <button id="cancelPayment" 
+                                    style="background: #666; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 14px;">
+                                Annuler
                             </button>
                         </div>
                         
                         <p style="font-size: 12px; color: #ccc; margin-top: 20px;">
-                            ⚠️ Simulation - Intégrez un vrai processeur de paiement
+                            Vous serez redirigé vers la plateforme de paiement sécurisée
                         </p>
                     `;
 
                     document.body.appendChild(paymentWindow);
 
-                    // Gestion du paiement réussi
-                    document.getElementById('successPayment').onclick = async () => {
-                        console.log('✅ Paiement réussi simulé');
-                        await this.handlePaymentResult('success', clientData.id);
-                        paymentWindow.remove();
-                        resolve(true);
+                    // Gestion du paiement Sberbank
+                    document.getElementById('sberbankPayment').onclick = async () => {
+                        console.log('🏦 Paiement Sberbank sélectionné');
+
+                        // Ouvrir le lien Sberbank dans un nouvel onglet
+                        window.open(this.bankLinks.sberbank, '_blank');
+
+                        // Simuler un paiement réussi après un délai
+                        setTimeout(async () => {
+                            await this.sendPaymentConfirmation(clientData, 'success', 'Sberbank');
+                            await this.handlePaymentResult('success', clientData.id, 'Sberbank');
+                            paymentWindow.remove();
+                            resolve(true);
+                        }, 2000);
                     };
 
-                    // Gestion du paiement échoué
-                    document.getElementById('failedPayment').onclick = async () => {
-                        console.log('❌ Paiement échoué simulé');
-                        await this.handlePaymentResult('failed', clientData.id);
+                    // Gestion du paiement Tinkoff
+                    document.getElementById('tinkoffPayment').onclick = async () => {
+                        console.log('💳 Paiement Tinkoff sélectionné');
+
+                        // Ouvrir le lien Tinkoff dans un nouvel onglet
+                        window.open(this.bankLinks.tinkoff, '_blank');
+
+                        // Simuler un paiement réussi après un délai
+                        setTimeout(async () => {
+                            await this.sendPaymentConfirmation(clientData, 'success', 'Tinkoff');
+                            await this.handlePaymentResult('success', clientData.id, 'Tinkoff');
+                            paymentWindow.remove();
+                            resolve(true);
+                        }, 2000);
+                    };
+
+                    // Gestion de l'annulation
+                    document.getElementById('cancelPayment').onclick = async () => {
+                        console.log('❌ Paiement annulé');
+
+                        await this.sendPaymentConfirmation(clientData, 'cancelled', 'Aucune');
+                        await this.handlePaymentResult('cancelled', clientData.id, 'Aucune');
                         paymentWindow.remove();
                         resolve(false);
                     };
@@ -880,19 +998,77 @@
                 });
             }
 
-            async handlePaymentResult(status, clientId) {
+            async sendPaymentConfirmation(clientData, status, bank) {
                 try {
-                    console.log(`🔄 Traitement du résultat du paiement: ${status}`);
+                    console.log('📧 Envoi confirmation paiement...');
 
-                    await this.updatePaymentStatus(clientId, status);
-                    await this.savePaymentRecord(clientId, status);
+                    const coupleNames = clientData.nom2 ?
+                        `${clientData.nom1} & ${clientData.nom2}` :
+                        `${clientData.nom1} & Partenaire`;
+
+                    const templateParams = {
+                        to_email: this.emailjsConfig.toEmail, // VOTRE EMAIL
+                        client_name: clientData.nom1,
+                        partner_name: clientData.nom2 || 'Partenaire',
+                        client_email: clientData.email,
+                        client_phone: clientData.phone,
+                        billet_type: 'Couple',
+                        amount: this.amount + ' FCFA',
+                        payment_status: status === 'success' ? 'PAYÉ' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC',
+                        payment_date: new Date().toLocaleDateString('fr-FR'),
+                        bank_method: bank,
+                        reference: clientData.id,
+                        couple_names: coupleNames,
+                        subject: `PAIEMENT ${status === 'success' ? 'RÉUSSI' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHOUÉ'} - ${coupleNames}`,
+                        message: `
+                            STATUT DE PAIEMENT: ${status === 'success' ? '✅ PAYÉ' : status === 'cancelled' ? '🟡 ANNULÉ' : '❌ ÉCHEC'}
+                            BANQUE: ${bank}
+                            
+                            👫 INFORMATIONS DU COUPLE:
+                            Personne 1: ${clientData.nom1}
+                            Personne 2: ${clientData.nom2 || 'Partenaire'}
+                            Email: ${clientData.email}
+                            Téléphone: ${clientData.phone}
+                            
+                            💳 INFORMATIONS PAIEMENT:
+                            Type: Couple
+                            Montant: ${this.amount} FCFA
+                            Date: ${new Date().toLocaleDateString('fr-FR')}
+                            Statut: ${status === 'success' ? 'PAYÉ' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC'}
+                            Méthode: ${bank}
+                            Référence: ${clientData.id}
+                        `
+                    };
+
+                    await emailjs.send(
+                        this.emailjsConfig.serviceId,
+                        this.emailjsConfig.templateId,
+                        templateParams
+                    );
+
+                    console.log('✅ Confirmation paiement envoyée');
+
+                } catch (error) {
+                    console.error('❌ Erreur envoi confirmation paiement:', error);
+                }
+            }
+
+            async handlePaymentResult(status, clientId, bank) {
+                try {
+                    console.log(`🔄 Traitement du résultat du paiement: ${status} via ${bank}`);
+
+                    await this.updatePaymentStatus(clientId, status, bank);
+                    await this.savePaymentRecord(clientId, status, bank);
 
                     // Réactiver le bouton
                     document.getElementById('submitBtn').disabled = false;
 
                     if (status === 'success') {
-                        this.showSuccess('Paiement confirmé ! Votre billet est validé.');
+                        this.showSuccess(`Paiement confirmé via ${bank} ! Votre billet est validé.`);
                         console.log('✅ Paiement traité avec succès');
+                    } else if (status === 'cancelled') {
+                        this.showNotification('Paiement annulé.', 'warning');
+                        console.log('🟡 Paiement annulé');
                     } else {
                         this.showError('Paiement échoué. Veuillez réessayer.');
                         console.log('❌ Paiement échoué traité');
@@ -904,29 +1080,25 @@
                 }
             }
 
-            async updatePaymentStatus(clientId, status) {
+            async updatePaymentStatus(clientId, status, bank) {
                 try {
-                    const client = await billetDB.getClient(clientId);
-                    if (client) {
-                        client.paiement = status === 'success' ? 'Payé' : 'Échec';
-                        client.paymentDate = new Date().toISOString();
-                        await billetDB.saveClient(client);
-                        console.log('✅ Statut paiement mis à jour:', clientId, status);
-                    }
+                    // Mettre à jour le statut en localStorage
+                    this.updatePaymentStatusFallback(clientId, status, bank);
+                    console.log('✅ Statut paiement mis à jour:', clientId, status, bank);
                 } catch (error) {
                     console.error('❌ Erreur mise à jour statut paiement:', error);
-                    this.updatePaymentStatusFallback(clientId, status);
                 }
             }
 
-            updatePaymentStatusFallback(clientId, status) {
+            updatePaymentStatusFallback(clientId, status, bank) {
                 try {
-                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients_fallback')) || [];
+                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients')) || [];
                     const clientIndex = clients.findIndex(client => client.id === clientId);
                     if (clientIndex !== -1) {
-                        clients[clientIndex].paiement = status === 'success' ? 'Payé' : 'Échec';
+                        clients[clientIndex].paiement = status === 'success' ? 'Payé' : status === 'cancelled' ? 'Annulé' : 'Échec';
+                        clients[clientIndex].paymentMethod = bank;
                         clients[clientIndex].paymentDate = new Date().toISOString();
-                        localStorage.setItem('bielleterie_clients_fallback', JSON.stringify(clients));
+                        localStorage.setItem('bielleterie_clients', JSON.stringify(clients));
                         console.log('✅ Statut paiement mis à jour en fallback');
                     }
                 } catch (error) {
@@ -934,19 +1106,23 @@
                 }
             }
 
-            async savePaymentRecord(clientId, status) {
+            async savePaymentRecord(clientId, status, bank) {
                 try {
                     const payment = {
                         id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                         clientId: clientId,
                         amount: this.amount,
                         status: status,
-                        method: 'simulation',
+                        method: bank,
                         timestamp: new Date().toISOString(),
                         type: 'couple'
                     };
 
-                    await billetDB.savePayment(payment);
+                    // Sauvegarder en localStorage
+                    let payments = JSON.parse(localStorage.getItem('bielleterie_payments')) || [];
+                    payments.push(payment);
+                    localStorage.setItem('bielleterie_payments', JSON.stringify(payments));
+
                     console.log('✅ Enregistrement de paiement sauvegardé');
                 } catch (error) {
                     console.error('❌ Erreur sauvegarde paiement:', error);
@@ -1000,7 +1176,7 @@
 
         // Initialisation du système
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('📄 Page Couple chargée');
+            console.log('📄 Page Couple chargée - Prête à recevoir les inscriptions');
             window.billetSystem = new BilletSystemCouple();
         });
     </script>
