@@ -39,7 +39,6 @@
             z-index: -1;
         }
 
-        /* Bouton info */
         .info-button {
             width: 50px;
             height: 50px;
@@ -60,13 +59,6 @@
             text-decoration: none;
         }
 
-        .info-button:hover {
-            transform: translateX(2px);
-            background: rgba(255, 255, 255, 0.197);
-            box-shadow: none;
-        }
-
-        /* Logos responsive */
         .logo {
             position: fixed;
             top: 20px;
@@ -94,7 +86,6 @@
             background: linear-gradient(to right, #ffffff44, #ffffffac);
         }
 
-        /* Section principale */
         .billet {
             text-align: center;
             padding: 20px;
@@ -197,7 +188,7 @@
             transition: all 0.3s ease;
         }
 
-        .users-btn:hover {
+        .users-btn:hover:not(:disabled) {
             background: rgba(164, 162, 162, 0.8);
             transform: scale(1.05);
         }
@@ -208,7 +199,6 @@
             transform: none;
         }
 
-        /* Social media buttons wrapper */
         .wrapper {
             position: fixed;
             bottom: 20px;
@@ -219,7 +209,6 @@
             max-width: 400px;
         }
 
-        /* Social buttons list */
         .wrapper ul {
             display: flex;
             gap: 10px;
@@ -229,7 +218,6 @@
             flex-wrap: wrap;
         }
 
-        /* Individual social icon button */
         .wrapper .icon {
             position: relative;
             display: flex;
@@ -244,47 +232,15 @@
             border: 1px solid rgba(255, 255, 255, 0.288);
         }
 
-        /* Social icon font styling */
         .wrapper .icon i {
             font-size: 18px;
             color: white;
         }
 
-        /* Social icon hover animation */
         .wrapper .icon:hover {
             transform: scale(1.2);
         }
 
-        /* Social icon hover colors */
-        .wrapper .facebook:hover {
-            background: #1d7df2;
-        }
-
-        .wrapper .twitter:hover {
-            background: #24a1de;
-        }
-
-        .wrapper .youtube:hover {
-            background: #cd201f;
-        }
-
-        .wrapper .whatsapp:hover {
-            background: rgb(47, 183, 47);
-        }
-
-        .wrapper .telephone:hover {
-            background: #333;
-        }
-
-        .wrapper .mail:hover {
-            background: #d71919;
-        }
-
-        .wrapper .telegram:hover {
-            background: #2aabee;
-        }
-
-        /* Notification */
         .notification {
             position: fixed;
             top: 20px;
@@ -310,7 +266,35 @@
             background: #ffa502;
         }
 
-        /* Media Queries pour différents écrans */
+        .notification.info {
+            background: #2aabee;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff6b6b;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Media Queries */
         @media (min-width: 768px) {
 
             .logo,
@@ -516,11 +500,13 @@
 </head>
 
 <body>
-
     <img src="logo.jpg" class="logo" alt="Logo">
     <img src="logo2.jpg" class="logo2" alt="Logo secondaire">
 
     <div class="notification" id="notification"></div>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
 
     <div class="billet">
         <h1 class="ligne">Couple</h1>
@@ -536,7 +522,7 @@
             <input type="email" class="users" name="email" placeholder="Entrez votre e-mail" id="email" maxlength="100">
             <input type="tel" class="users" name="phone" placeholder="Entrez votre numero" id="phone" maxlength="15">
             <div class="use-btn">
-                <input type="button" class="users-btn" value="Entrer" id="submitBtn">
+                <button type="button" class="users-btn" id="submitBtn">Entrer</button>
             </div>
         </div>
     </div>
@@ -571,37 +557,50 @@
         </ul>
     </div>
 
+    <!-- Inclure la base de données synchronisée -->
+    <script src="billet-db.js"></script>
+
     <script>
-        // SYSTÈME CLIENT SÉCURISÉ POUR COUPLE
+        // SYSTÈME CLIENT SIMPLIFIÉ ET CORRIGÉ POUR COUPLE
         class BilletSystemCouple {
             constructor() {
-                this.amount = 5000; // Prix couple
+                this.amount = 5000;
+                this.isSubmitting = false;
                 this.init();
             }
 
             init() {
-                document.addEventListener('DOMContentLoaded', () => {
-                    this.setupFormSubmission();
-                    this.setupSecurity();
-                    this.setupInputValidation();
-                });
+                console.log('🚀 Initialisation système Couple...');
+                this.setupFormSubmission();
+                this.setupInputValidation();
             }
 
             setupFormSubmission() {
                 const submitBtn = document.getElementById('submitBtn');
-                if (!submitBtn) return;
+                if (!submitBtn) {
+                    console.error('❌ Bouton submit non trouvé');
+                    return;
+                }
 
                 submitBtn.addEventListener('click', (e) => {
                     e.preventDefault();
+                    console.log('🔄 Clic sur le bouton Entrer');
                     this.handleFormSubmission();
                 });
 
-                // Soumission avec Enter
-                document.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.handleFormSubmission();
-                    }
+                // Écouter la touche Entrée sur tous les champs
+                const inputs = document.querySelectorAll('.users');
+                inputs.forEach(input => {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            console.log('⌨️ Touche Entrée pressée');
+                            this.handleFormSubmission();
+                        }
+                    });
                 });
+
+                console.log('✅ Événements de soumission configurés');
             }
 
             setupInputValidation() {
@@ -618,11 +617,9 @@
 
                 switch (input.type) {
                     case 'text':
-                        // Validation nom : seulement lettres, espaces et certains caractères spéciaux
                         input.value = value.replace(/[^a-zA-ZÀ-ÿ\s\-']/g, '');
                         break;
                     case 'email':
-                        // Validation email basique
                         if (value && !this.validateEmail(value)) {
                             input.style.borderColor = '#ff4757';
                         } else {
@@ -630,7 +627,6 @@
                         }
                         break;
                     case 'tel':
-                        // Validation téléphone : seulement chiffres, +, -, espaces, parenthèses
                         input.value = value.replace(/[^\d+\-\s()]/g, '');
                         if (value && !this.validatePhone(value)) {
                             input.style.borderColor = '#ff4757';
@@ -641,14 +637,41 @@
                 }
             }
 
-            handleFormSubmission() {
-                const clientData = this.getFormData();
-                if (!clientData) return;
+            async handleFormSubmission() {
+                if (this.isSubmitting) {
+                    console.log('⏳ Déjà en cours de soumission...');
+                    return;
+                }
 
-                this.saveClientData(clientData);
-                this.showSuccess('Inscription réussie !');
-                this.processPayment(clientData);
-                this.resetForm();
+                this.isSubmitting = true;
+                this.showLoading(true);
+
+                try {
+                    console.log('🔄 Début du traitement du formulaire...');
+
+                    const clientData = this.getFormData();
+                    if (!clientData) {
+                        this.isSubmitting = false;
+                        this.showLoading(false);
+                        return;
+                    }
+
+                    console.log('✅ Données du formulaire valides:', clientData);
+
+                    const saved = await this.saveClientData(clientData);
+                    if (saved) {
+                        this.showSuccess('Inscription réussie !');
+                        await this.processPayment(clientData);
+                        this.resetForm();
+                    }
+
+                } catch (error) {
+                    console.error('❌ Erreur soumission:', error);
+                    this.showError('Erreur lors de l\'inscription. Veuillez réessayer.');
+                } finally {
+                    this.isSubmitting = false;
+                    this.showLoading(false);
+                }
             }
 
             getFormData() {
@@ -657,8 +680,10 @@
                 const email = document.getElementById('email').value.trim();
                 const phone = document.getElementById('phone').value.trim();
 
+                console.log('📝 Validation des données:', { nom1, nom2, email, phone });
+
                 // Validation des champs requis
-                if (!this.validateRequired([nom1, email, phone])) {
+                if (!nom1 || !email || !phone) {
                     this.showError('Veuillez remplir tous les champs obligatoires');
                     return null;
                 }
@@ -680,21 +705,17 @@
 
                 return {
                     nom1: nom1,
-                    nom2: nom2,
+                    nom2: nom2 || '',
                     email: email,
                     phone: phone,
                     type: 'couple',
                     timestamp: new Date().toISOString(),
                     page: 'couple',
-                    ip: this.getUserIP(),
+                    ip: 'local',
                     userAgent: navigator.userAgent,
                     id: this.generateUniqueId(),
                     paiement: 'En attente'
                 };
-            }
-
-            validateRequired(fields) {
-                return fields.every(field => field !== '');
             }
 
             validateEmail(email) {
@@ -704,7 +725,7 @@
 
             validatePhone(phone) {
                 const cleaned = phone.replace(/\s/g, '');
-                const re = /^[\+]?[0-9\-\s\(\)]{10,}$/;
+                const re = /^[\+]?[0-9\-\s\(\)]{8,}$/;
                 return re.test(cleaned) && cleaned.replace(/\D/g, '').length >= 8;
             }
 
@@ -717,38 +738,46 @@
                 return 'CPL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             }
 
-            getUserIP() {
-                // En production, utiliser un service d'API IP
-                return 'local';
-            }
-
-            saveClientData(clientData) {
+            async saveClientData(clientData) {
                 try {
-                    // Sauvegarde sécurisée dans l'espace admin
-                    this.saveToAdminStorage(clientData);
+                    console.log('💾 Tentative de sauvegarde du client...');
 
-                    // Sauvegarde locale de backup
-                    this.saveToLocalBackup(clientData);
+                    // Initialiser la base de données
+                    await billetDB.init();
+                    console.log('✅ Base de données initialisée');
 
-                    console.log('✅ Données enregistrées de manière sécurisée');
+                    // Sauvegarder le client
+                    const clientId = await billetDB.saveClient(clientData);
+                    console.log('✅ Client sauvegardé avec ID:', clientId);
+
+                    // Vérifier que le client est bien sauvegardé
+                    const verification = await billetDB.getClient(clientId);
+                    if (verification) {
+                        console.log('✅ Vérification réussie - Client trouvé dans BDD');
+                    } else {
+                        console.error('❌ Vérification échouée - Client non trouvé');
+                    }
+
                     return true;
+
                 } catch (error) {
-                    console.error('❌ Erreur sauvegarde:', error);
-                    this.showError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
+                    console.error('❌ Erreur sauvegarde IndexedDB:', error);
+
+                    // Fallback vers localStorage
+                    const fallbackSaved = this.saveToLocalStorage(clientData);
+                    if (fallbackSaved) {
+                        console.log('🔄 Données sauvegardées en fallback localStorage');
+                        this.showNotification('Données sauvegardées localement', 'info');
+                        return true;
+                    }
+
                     return false;
                 }
             }
 
-            saveToAdminStorage(clientData) {
+            saveToLocalStorage(clientData) {
                 try {
-                    // Récupérer les données existantes (chiffrées)
-                    const encryptedData = localStorage.getItem('bielleterie_clients_secure');
-                    let clients = [];
-
-                    if (encryptedData) {
-                        // Déchiffrer les données
-                        clients = JSON.parse(decodeURIComponent(escape(atob(encryptedData)))) || [];
-                    }
+                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients_fallback')) || [];
 
                     // Vérifier les doublons
                     const isDuplicate = clients.some(client =>
@@ -758,151 +787,184 @@
                     if (!isDuplicate) {
                         clients.push(clientData);
 
-                        // Chiffrer et sauvegarder
-                        const newEncryptedData = btoa(unescape(encodeURIComponent(JSON.stringify(clients))));
-                        localStorage.setItem('bielleterie_clients_secure', newEncryptedData);
-                    } else {
-                        console.log('⚠️ Client déjà enregistré');
-                    }
-                } catch (error) {
-                    console.error('Erreur sauvegarde admin:', error);
-                    throw error;
-                }
-            }
-
-            saveToLocalBackup(clientData) {
-                try {
-                    let backupData = JSON.parse(localStorage.getItem('bielleterie_backup_couple')) || [];
-                    backupData.push(clientData);
-
-                    // Garder seulement les 50 derniers enregistrements
-                    if (backupData.length > 50) {
-                        backupData = backupData.slice(-50);
-                    }
-
-                    localStorage.setItem('bielleterie_backup_couple', JSON.stringify(backupData));
-                } catch (error) {
-                    console.error('Erreur sauvegarde backup:', error);
-                }
-            }
-
-            processPayment(clientData) {
-                const paymentWindow = document.createElement('div');
-                paymentWindow.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(0, 0, 0, 0.95);
-                    padding: 30px;
-                    border-radius: 15px;
-                    z-index: 10000;
-                    color: white;
-                    text-align: center;
-                    min-width: 300px;
-                    box-shadow: 0 0 50px rgba(255,107,107,0.3);
-                    border: 2px solid #ff6b6b;
-                    backdrop-filter: blur(10px);
-                `;
-
-                paymentWindow.innerHTML = `
-                    <h3 style="color: #ff6b6b; margin-bottom: 20px;">💳 Paiement Couple</h3>
-                    <p><strong>${clientData.nom1}</strong> & <strong>${clientData.nom2 || 'Partenaire'}</strong></p>
-                    <p>Email: ${clientData.email}</p>
-                    <p>Téléphone: ${clientData.phone}</p>
-                    <div style="margin: 20px 0; padding: 15px; background: rgba(255,107,107,0.1); border-radius: 10px;">
-                        <p style="font-size: 24px; font-weight: bold; color: #ff6b6b;">${this.amount} FCFA</p>
-                    </div>
-                    
-                    <div style="margin: 20px 0;">
-                        <button onclick="window.billetSystem.completePayment('success', '${clientData.id}')" 
-                                style="background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
-                            ✅ Paiement Réussi
-                        </button>
-                        <button onclick="window.billetSystem.completePayment('failed', '${clientData.id}')" 
-                                style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
-                            ❌ Échec Paiement
-                        </button>
-                    </div>
-                    
-                    <p style="font-size: 12px; color: #ccc; margin-top: 20px;">
-                        ⚠️ Simulation - Intégrez un vrai processeur de paiement
-                    </p>
-                `;
-
-                document.body.appendChild(paymentWindow);
-
-                // Désactiver le bouton de soumission
-                document.getElementById('submitBtn').disabled = true;
-            }
-
-            completePayment(status, clientId) {
-                try {
-                    // Mettre à jour le statut de paiement
-                    this.updatePaymentStatus(clientId, status);
-
-                    // Fermer la fenêtre de paiement
-                    document.querySelectorAll('div').forEach(div => {
-                        if (div.innerHTML.includes('💳 Paiement Couple')) {
-                            div.remove();
+                        // Limiter à 100 entrées maximum
+                        if (clients.length > 100) {
+                            clients = clients.slice(-100);
                         }
-                    });
+
+                        localStorage.setItem('bielleterie_clients_fallback', JSON.stringify(clients));
+                        console.log('✅ Client sauvegardé en fallback localStorage');
+                        return true;
+                    } else {
+                        console.log('⚠️ Client déjà enregistré en fallback');
+                        this.showNotification('Vous êtes déjà inscrit!', 'warning');
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur fallback:', error);
+                    return false;
+                }
+            }
+
+            async processPayment(clientData) {
+                return new Promise((resolve) => {
+                    console.log('💳 Ouverture de la fenêtre de paiement...');
+
+                    const paymentWindow = document.createElement('div');
+                    paymentWindow.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.95);
+                        padding: 30px;
+                        border-radius: 15px;
+                        z-index: 10000;
+                        color: white;
+                        text-align: center;
+                        min-width: 300px;
+                        box-shadow: 0 0 50px rgba(255,107,107,0.3);
+                        border: 2px solid #ff6b6b;
+                        backdrop-filter: blur(10px);
+                    `;
+
+                    const coupleNames = clientData.nom2 ?
+                        `${clientData.nom1} & ${clientData.nom2}` :
+                        `${clientData.nom1} & Partenaire`;
+
+                    paymentWindow.innerHTML = `
+                        <h3 style="color: #ff6b6b; margin-bottom: 20px;">💳 Paiement Couple</h3>
+                        <p><strong>${coupleNames}</strong></p>
+                        <p>Email: ${clientData.email}</p>
+                        <p>Téléphone: ${clientData.phone}</p>
+                        <div style="margin: 20px 0; padding: 15px; background: rgba(255,107,107,0.1); border-radius: 10px;">
+                            <p style="font-size: 24px; font-weight: bold; color: #ff6b6b;">${this.amount} FCFA</p>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <button id="successPayment" 
+                                    style="background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                                ✅ Paiement Réussi
+                            </button>
+                            <button id="failedPayment" 
+                                    style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                                ❌ Échec Paiement
+                            </button>
+                        </div>
+                        
+                        <p style="font-size: 12px; color: #ccc; margin-top: 20px;">
+                            ⚠️ Simulation - Intégrez un vrai processeur de paiement
+                        </p>
+                    `;
+
+                    document.body.appendChild(paymentWindow);
+
+                    // Gestion du paiement réussi
+                    document.getElementById('successPayment').onclick = async () => {
+                        console.log('✅ Paiement réussi simulé');
+                        await this.handlePaymentResult('success', clientData.id);
+                        paymentWindow.remove();
+                        resolve(true);
+                    };
+
+                    // Gestion du paiement échoué
+                    document.getElementById('failedPayment').onclick = async () => {
+                        console.log('❌ Paiement échoué simulé');
+                        await this.handlePaymentResult('failed', clientData.id);
+                        paymentWindow.remove();
+                        resolve(false);
+                    };
+
+                    // Désactiver le bouton de soumission pendant le paiement
+                    document.getElementById('submitBtn').disabled = true;
+                });
+            }
+
+            async handlePaymentResult(status, clientId) {
+                try {
+                    console.log(`🔄 Traitement du résultat du paiement: ${status}`);
+
+                    await this.updatePaymentStatus(clientId, status);
+                    await this.savePaymentRecord(clientId, status);
 
                     // Réactiver le bouton
                     document.getElementById('submitBtn').disabled = false;
 
                     if (status === 'success') {
                         this.showSuccess('Paiement confirmé ! Votre billet est validé.');
-                        this.trackConversion('couple', this.amount);
+                        console.log('✅ Paiement traité avec succès');
                     } else {
                         this.showError('Paiement échoué. Veuillez réessayer.');
+                        console.log('❌ Paiement échoué traité');
                     }
                 } catch (error) {
-                    console.error('Erreur paiement:', error);
+                    console.error('❌ Erreur traitement paiement:', error);
                     this.showError('Erreur lors du traitement du paiement.');
+                    document.getElementById('submitBtn').disabled = false;
                 }
             }
 
-            updatePaymentStatus(clientId, status) {
+            async updatePaymentStatus(clientId, status) {
                 try {
-                    const encryptedData = localStorage.getItem('bielleterie_clients_secure');
-                    if (encryptedData) {
-                        let clients = JSON.parse(decodeURIComponent(escape(atob(encryptedData)))) || [];
-
-                        const clientIndex = clients.findIndex(client => client.id === clientId);
-                        if (clientIndex !== -1) {
-                            clients[clientIndex].paiement = status === 'success' ? 'Payé' : 'Échec';
-                            clients[clientIndex].paymentDate = new Date().toISOString();
-
-                            const newEncryptedData = btoa(unescape(encodeURIComponent(JSON.stringify(clients))));
-                            localStorage.setItem('bielleterie_clients_secure', newEncryptedData);
-                        }
+                    const client = await billetDB.getClient(clientId);
+                    if (client) {
+                        client.paiement = status === 'success' ? 'Payé' : 'Échec';
+                        client.paymentDate = new Date().toISOString();
+                        await billetDB.saveClient(client);
+                        console.log('✅ Statut paiement mis à jour:', clientId, status);
                     }
                 } catch (error) {
-                    console.error('Erreur mise à jour paiement:', error);
+                    console.error('❌ Erreur mise à jour statut paiement:', error);
+                    this.updatePaymentStatusFallback(clientId, status);
                 }
             }
 
-            trackConversion(type, amount) {
+            updatePaymentStatusFallback(clientId, status) {
                 try {
-                    const conversion = {
-                        type: type,
-                        amount: amount,
+                    let clients = JSON.parse(localStorage.getItem('bielleterie_clients_fallback')) || [];
+                    const clientIndex = clients.findIndex(client => client.id === clientId);
+                    if (clientIndex !== -1) {
+                        clients[clientIndex].paiement = status === 'success' ? 'Payé' : 'Échec';
+                        clients[clientIndex].paymentDate = new Date().toISOString();
+                        localStorage.setItem('bielleterie_clients_fallback', JSON.stringify(clients));
+                        console.log('✅ Statut paiement mis à jour en fallback');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur fallback statut paiement:', error);
+                }
+            }
+
+            async savePaymentRecord(clientId, status) {
+                try {
+                    const payment = {
+                        id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                        clientId: clientId,
+                        amount: this.amount,
+                        status: status,
+                        method: 'simulation',
                         timestamp: new Date().toISOString(),
-                        page: 'couple'
+                        type: 'couple'
                     };
 
-                    let conversions = JSON.parse(localStorage.getItem('bielleterie_conversions')) || [];
-                    conversions.push(conversion);
-
-                    // Garder seulement les 100 dernières conversions
-                    if (conversions.length > 100) {
-                        conversions = conversions.slice(-100);
-                    }
-
-                    localStorage.setItem('bielleterie_conversions', JSON.stringify(conversions));
+                    await billetDB.savePayment(payment);
+                    console.log('✅ Enregistrement de paiement sauvegardé');
                 } catch (error) {
-                    console.error('Erreur tracking conversion:', error);
+                    console.error('❌ Erreur sauvegarde paiement:', error);
+                }
+            }
+
+            showLoading(show) {
+                const loading = document.getElementById('loading');
+                const submitBtn = document.getElementById('submitBtn');
+
+                if (show) {
+                    loading.style.display = 'block';
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Traitement...';
+                } else {
+                    loading.style.display = 'none';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Entrer';
                 }
             }
 
@@ -920,6 +982,8 @@
                 notification.className = `notification ${type}`;
                 notification.style.display = 'block';
 
+                console.log(`📢 Notification: ${message}`);
+
                 setTimeout(() => {
                     notification.style.display = 'none';
                 }, 5000);
@@ -930,53 +994,15 @@
                 document.getElementById('user2').value = '';
                 document.getElementById('email').value = '';
                 document.getElementById('phone').value = '';
-            }
-
-            setupSecurity() {
-                this.disableDevTools();
-                this.protectContextMenu();
-                this.preventCopyPaste();
-            }
-
-            disableDevTools() {
-                document.addEventListener('keydown', (e) => {
-                    if (
-                        e.key === 'F12' ||
-                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-                        (e.ctrlKey && e.key === 'u') ||
-                        (e.ctrlKey && e.key === 's')
-                    ) {
-                        e.preventDefault();
-                        this.showError('Action non autorisée');
-                        return false;
-                    }
-                });
-            }
-
-            protectContextMenu() {
-                document.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    this.showError('Action non autorisée');
-                    return false;
-                });
-            }
-
-            preventCopyPaste() {
-                document.addEventListener('copy', (e) => {
-                    e.preventDefault();
-                    this.showError('Copie non autorisée');
-                });
-
-                document.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    this.showError('Collage non autorisé');
-                });
+                console.log('🔄 Formulaire réinitialisé');
             }
         }
 
-        // Initialisation
-        window.billetSystem = new BilletSystemCouple();
+        // Initialisation du système
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 Page Couple chargée');
+            window.billetSystem = new BilletSystemCouple();
+        });
     </script>
 </body>
 

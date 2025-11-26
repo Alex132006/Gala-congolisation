@@ -1,0 +1,47 @@
+# // Client
+
+# {
+
+# id: "CPL_1640995200000_abc123def",
+
+# nom1: "Jean Dupont",
+
+# nom2: "Marie Martin", // Optionnel pour couple
+
+# email: "jean.dupont@email.com",
+
+# phone: "+33 1 23 45 67 89",
+
+# type: "couple", // ou "unite"
+
+# timestamp: "2024-01-01T10:30:00.000Z",
+
+# paiement: "Payé", // "En attente", "Échec"
+
+# paymentDate: "2024-01-01T10:35:00.000Z", // Optionnel
+
+# page: "couple", // Page d'origine
+
+# userAgent: "Mozilla/5.0...",
+
+# ip: "local" // Remplacer par IP réelle en production
+
+# }
+
+# // Paiement
+
+# {
+
+# id: "pay_1640995200000_xyz789",
+
+# clientId: "CPL_1640995200000_abc123def",
+
+# amount: 5000,
+
+# status: "success", // "failed"
+
+# method: "simulation",
+
+# timestamp: "2024-01-01T10:35:00.000Z"
+
+# }
