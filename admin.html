@@ -1498,6 +1498,564 @@ Page: ${client.page || 'Inconnue'}
                 showNotification('Inspection du code désactivée', 'warning');
             }
         });
+
+        // ==================== SYSTÈME DE PERSISTANCE ====================
+        async function initializePersistentSystem() {
+            console.log('🛡️ Initialisation du système persistant...');
+
+            try {
+                // Vérifier l'état de la base de données
+                const diagnostic = await billetDB.diagnostic();
+                console.log('📊 Diagnostic persistance:', diagnostic);
+
+                // Forcer une sauvegarde immédiate
+                await billetDB.createAutoBackup();
+
+                // Vérifier les données de fallback
+                await checkAndRestoreFromFallback();
+
+                showNotification('Système persistant activé', 'success');
+
+            } catch (error) {
+                console.error('❌ Erreur initialisation persistance:', error);
+                showNotification('Erreur système persistant', 'error');
+            }
+        }
+
+        async function checkAndRestoreFromFallback() {
+            try {
+                const clients = await billetDB.getAllClients();
+
+                if (clients.length === 0) {
+                    console.log('🔄 Aucun client en base, vérification des sauvegardes...');
+
+                    // Vérifier localStorage
+                    const fallback = localStorage.getItem('bielleterie_clients_fallback');
+                    if (fallback) {
+                        const fallbackClients = JSON.parse(fallback);
+                        if (fallbackClients.length > 0) {
+                            console.log(`🔄 Restauration de ${fallbackClients.length} clients depuis fallback`);
+
+                            for (const client of fallbackClients) {
+                                await billetDB.saveClient(client);
+                            }
+
+                            showNotification(`${fallbackClients.length} clients restaurés depuis sauvegarde`, 'success');
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            } catch (error) {
+                console.error('❌ Erreur restauration fallback:', error);
+                return false;
+            }
+        }
+
+        // Fonction de vérification de santé des données
+        async function checkDataHealth() {
+            try {
+                const clients = await billetDB.getAllClients();
+                const diagnostic = await billetDB.diagnostic();
+
+                let healthStatus = {
+                    clientsInDB: clients.length,
+                    clientsInBackup: diagnostic.localStorageBackup,
+                    clientsInFallback: diagnostic.fallbackClients,
+                    lastBackup: diagnostic.lastBackup,
+                    health: 'GOOD'
+                };
+
+                // Vérifier la cohérence
+                if (clients.length === 0 && diagnostic.fallbackClients > 0) {
+                    healthStatus.health = 'NEEDS_RESTORE';
+                    console.warn('⚠️ Données manquantes en BDD mais présentes en fallback');
+                }
+
+                if (clients.length === 0 && diagnostic.fallbackClients === 0) {
+                    healthStatus.health = 'EMPTY';
+                    console.warn('⚠️ Aucune donnée trouvée');
+                }
+
+                console.log('❤️ Santé des données:', healthStatus);
+                return healthStatus;
+
+            } catch (error) {
+                console.error('❌ Erreur vérification santé:', error);
+                return { health: 'ERROR', error: error.message };
+            }
+        }
+
+        // Fonction de réparation automatique
+        async function autoRepairData() {
+            showLoading(true);
+
+            try {
+                console.log('🔧 Début réparation automatique...');
+
+                const health = await checkDataHealth();
+
+                if (health.health === 'NEEDS_RESTORE') {
+                    await checkAndRestoreFromFallback();
+                    showNotification('Données réparées automatiquement', 'success');
+                } else if (health.health === 'EMPTY') {
+                    showNotification('Aucune donnée à restaurer', 'warning');
+                } else {
+                    showNotification('Données en bonne santé', 'success');
+                }
+
+                // Recharger le dashboard
+                await loadDashboard();
+
+            } catch (error) {
+                console.error('❌ Erreur réparation:', error);
+                showNotification('Erreur lors de la réparation', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Ajouter ces boutons dans la section contrôles de admin.html
+        function addPersistentControls() {
+            const controls = document.querySelector('.controls');
+
+            const persistentButtons = `
+        <button class="btn btn-success" onclick="forceBackup()">💾 Sauvegarde Forcée</button>
+        <button class="btn btn-info" onclick="checkDataHealth().then(health => alert('Santé: ' + JSON.stringify(health, null, 2)))">❤️ Santé Données</button>
+        <button class="btn btn-warning" onclick="autoRepairData()">🔧 Réparation Auto</button>
+        <button class="btn btn-primary" onclick="showBackupStatus()">📊 Statut Sauvegarde</button>
+    `;
+
+            // Insérer après les boutons existants
+            controls.innerHTML += persistentButtons;
+        }
+
+        async function forceBackup() {
+            showLoading(true);
+
+            try {
+                await billetDB.createAutoBackup();
+                showNotification('Sauvegarde forcée effectuée', 'success');
+            } catch (error) {
+                console.error('❌ Erreur sauvegarde forcée:', error);
+                showNotification('Erreur sauvegarde', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function showBackupStatus() {
+            try {
+                const diagnostic = await billetDB.diagnostic();
+                const health = await checkDataHealth();
+
+                let message = `📊 STATUT SAUVEGARDE:\n\n`;
+                message += `👥 Clients en BDD: ${diagnostic.totalClients}\n`;
+                message += `💾 Sauvegarde auto: ${diagnostic.localStorageBackup} clients\n`;
+                message += `🔄 Fallback: ${diagnostic.fallbackClients} clients\n`;
+                message += `📅 Dernière sauvegarde: ${diagnostic.lastBackup ? new Date(diagnostic.lastBackup).toLocaleString() : 'Jamais'}\n`;
+                message += `❤️ Santé: ${health.health}\n`;
+                message += `🆗 BDD Initialisée: ${diagnostic.dbInitialized ? 'OUI' : 'NON'}`;
+
+                alert(message);
+
+            } catch (error) {
+                alert('❌ Erreur statut: ' + error.message);
+            }
+        }
+
+        // Modifier l'initialisation dans admin.html
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('🚀 Initialisation admin avec persistance...');
+
+            // Ajouter les contrôles de persistance
+            addPersistentControls();
+
+            // Initialiser le système persistant
+            await initializePersistentSystem();
+
+            // Charger les données
+            await loadDashboard();
+
+            // Vérifier la santé toutes les 2 minutes
+            setInterval(async () => {
+                if (localStorage.getItem('adminAuthenticated') === 'true') {
+                    await checkDataHealth();
+                }
+            }, 120000);
+
+            // Sauvegarde automatique toutes les 5 minutes
+            setInterval(async () => {
+                if (localStorage.getItem('adminAuthenticated') === 'true') {
+                    await billetDB.createAutoBackup();
+                }
+            }, 300000);
+        });
+
+
+
+        // ==================== SYSTÈME DE RÉCEPTION TEMPS RÉEL ====================
+        class AdminRealtimeReceiver {
+            constructor() {
+                this.isListening = false;
+                this.lastUpdate = null;
+                this.pendingClients = [];
+            }
+
+            start() {
+                if (this.isListening) return;
+
+                console.log('📡 Démarrage récepteur temps réel...');
+
+                // Écouter les nouveaux clients depuis les appareils
+                window.addEventListener('bielleterieNewClients', (event) => {
+                    this.handleNewClients(event.detail.clients);
+                });
+
+                // Écouter le storage pour la sync cross-onglets
+                window.addEventListener('storage', (event) => {
+                    if (event.key === 'bielleterie_sync_to_admin' && event.newValue) {
+                        this.handleSyncData(event.newValue);
+                    }
+                });
+
+                // Vérifier périodiquement les nouvelles données
+                setInterval(() => {
+                    this.checkForNewData();
+                }, 3000);
+
+                // Synchronisation manuelle toutes les 30 secondes
+                setInterval(() => {
+                    this.forceSync();
+                }, 30000);
+
+                this.isListening = true;
+                showNotification('Récepteur temps réel activé', 'success');
+            }
+
+            async handleNewClients(clients) {
+                if (!clients || clients.length === 0) return;
+
+                console.log(`📨 Réception de ${clients.length} nouveaux clients`);
+
+                for (const client of clients) {
+                    await this.processNewClient(client);
+                }
+
+                showNotification(`${clients.length} nouveaux clients reçus`, 'success');
+
+                // Recharger l'interface
+                await loadDashboard();
+            }
+
+            async handleSyncData(syncDataStr) {
+                try {
+                    const syncData = JSON.parse(syncDataStr);
+
+                    if (syncData.action === 'sync_clients' && syncData.clients) {
+                        console.log(`🔄 Sync depuis ${syncData.source}: ${syncData.clients.length} clients`);
+
+                        for (const client of syncData.clients) {
+                            await this.processNewClient(client);
+                        }
+
+                        showNotification(`Sync: ${syncData.clients.length} clients de ${syncData.source}`, 'info');
+                        await loadDashboard();
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur traitement sync:', error);
+                }
+            }
+
+            async processNewClient(client) {
+                try {
+                    // Vérifier si le client existe déjà
+                    const existing = await billetDB.getClient(client.id);
+
+                    if (!existing) {
+                        // Marquer comme reçu par l'admin
+                        client.receivedByAdmin = true;
+                        client.receivedAt = new Date().toISOString();
+                        client.adminNotified = true;
+
+                        // Sauvegarder dans la base admin
+                        await billetDB.saveClient(client);
+
+                        console.log('✅ Nouveau client enregistré:', client.id);
+
+                        // Ajouter aux notifications en attente
+                        this.addToPendingNotifications(client);
+
+                    } else {
+                        console.log('ℹ️ Client déjà existant:', client.id);
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur traitement client:', error, client);
+                }
+            }
+
+            addToPendingNotifications(client) {
+                this.pendingClients.push({
+                    id: client.id,
+                    nom1: client.nom1,
+                    type: client.type,
+                    timestamp: new Date(),
+                    device: client.deviceId || 'Inconnu'
+                });
+
+                // Limiter à 50 notifications
+                if (this.pendingClients.length > 50) {
+                    this.pendingClients = this.pendingClients.slice(-50);
+                }
+
+                // Mettre à jour l'interface des notifications
+                this.updateNotificationsPanel();
+            }
+
+            updateNotificationsPanel() {
+                const notificationBadge = document.getElementById('notificationBadge');
+                const notificationsPanel = document.getElementById('notificationsPanel');
+
+                if (notificationBadge) {
+                    notificationBadge.textContent = this.pendingClients.length;
+                    notificationBadge.style.display = this.pendingClients.length > 0 ? 'inline' : 'none';
+                }
+
+                if (notificationsPanel) {
+                    this.renderNotifications(notificationsPanel);
+                }
+            }
+
+            renderNotifications(container) {
+                if (this.pendingClients.length === 0) {
+                    container.innerHTML = '<div class="no-data">Aucune nouvelle notification</div>';
+                    return;
+                }
+
+                const recentClients = this.pendingClients.slice(-10).reverse();
+
+                container.innerHTML = recentClients.map(client => `
+            <div class="notification-item">
+                <div class="notification-header">
+                    <strong>${client.nom1}</strong>
+                    <span class="notification-time">${this.formatTime(client.timestamp)}</span>
+                </div>
+                <div class="notification-body">
+                    <span class="client-type ${client.type}">${client.type === 'couple' ? '👫 Couple' : '👤 Single'}</span>
+                    <span class="device-info">📱 ${client.device}</span>
+                </div>
+            </div>
+        `).join('');
+            }
+
+            formatTime(timestamp) {
+                const now = new Date();
+                const time = new Date(timestamp);
+                const diff = now - time;
+
+                if (diff < 60000) return 'À l\'instant';
+                if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+                if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
+                return time.toLocaleTimeString();
+            }
+
+            async checkForNewData() {
+                try {
+                    // Vérifier le localStorage pour de nouvelles données
+                    const syncData = localStorage.getItem('bielleterie_sync_to_admin');
+                    if (syncData) {
+                        await this.handleSyncData(syncData);
+                        localStorage.removeItem('bielleterie_sync_to_admin');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur vérification nouvelles données:', error);
+                }
+            }
+
+            async forceSync() {
+                try {
+                    console.log('🔄 Synchronisation forcée...');
+
+                    // Récupérer tous les clients non synchronisés
+                    const clients = await billetDB.getAllClients();
+                    const unsynced = clients.filter(c => !c.synced);
+
+                    if (unsynced.length > 0) {
+                        console.log(`📤 Envoi de ${unsynced.length} clients non synchronisés`);
+
+                        // Marquer comme synchronisés
+                        for (const client of unsynced) {
+                            client.synced = true;
+                            client.syncedAt = new Date().toISOString();
+                            await billetDB.saveClient(client);
+                        }
+
+                        showNotification(`${unsynced.length} clients synchronisés`, 'info');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur sync forcée:', error);
+                }
+            }
+
+            clearNotifications() {
+                this.pendingClients = [];
+                this.updateNotificationsPanel();
+                showNotification('Notifications effacées', 'info');
+            }
+
+            getStats() {
+                return {
+                    totalReceived: this.pendingClients.length,
+                    lastUpdate: this.lastUpdate,
+                    isActive: this.isListening
+                };
+            }
+        }
+
+        // ==================== INTERFACE ADMIN AVEC NOTIFICATIONS ====================
+        function setupRealtimeInterface() {
+            // Ajouter le panneau de notifications dans le header
+            const header = document.querySelector('.header');
+
+            const notificationsHTML = `
+        <div class="admin-notifications">
+            <div class="notifications-header">
+                <h3>🔔 Notifications Temps Réel</h3>
+                <button class="btn btn-small btn-info" onclick="toggleNotifications()">
+                    📋 <span id="notificationBadge" style="display: none;">0</span>
+                </button>
+                <button class="btn btn-small btn-warning" onclick="adminReceiver.clearNotifications()">
+                    🗑️
+                </button>
+                <button class="btn btn-small btn-success" onclick="adminReceiver.forceSync()">
+                    🔄
+                </button>
+            </div>
+            <div class="notifications-panel" id="notificationsPanel" style="display: none;">
+                <div class="no-data">Chargement des notifications...</div>
+            </div>
+        </div>
+    `;
+
+            header.insertAdjacentHTML('beforeend', notificationsHTML);
+
+            // Ajouter les styles
+            const style = document.createElement('style');
+            style.textContent = `
+        .admin-notifications {
+            position: relative;
+            margin-left: auto;
+            margin-right: 20px;
+        }
+        
+        .notifications-header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .notifications-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .notification-item {
+            background: #3d3d3d;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 3px solid #ff6b6b;
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .notification-body {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8em;
+            color: #ccc;
+        }
+        
+        .client-type.couple {
+            color: #ff6b6b;
+        }
+        
+        .client-type.unite {
+            color: #4CAF50;
+        }
+        
+        .notification-time {
+            font-size: 0.7em;
+            color: #888;
+        }
+        
+        .device-info {
+            font-size: 0.7em;
+            color: #2aabee;
+        }
+        
+        #notificationBadge {
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            margin-left: 5px;
+        }
+    `;
+            document.head.appendChild(style);
+        }
+
+        function toggleNotifications() {
+            const panel = document.getElementById('notificationsPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ==================== INITIALISATION ====================
+        const adminReceiver = new AdminRealtimeReceiver();
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('🚀 Initialisation admin avec réception temps réel...');
+
+            // Configurer l'interface
+            setupRealtimeInterface();
+
+            // Démarrer le récepteur
+            adminReceiver.start();
+
+            // Charger les données initiales
+            await loadDashboard();
+
+            showNotification('Système temps réel activé - Prêt à recevoir des données', 'success');
+
+            // Afficher le statut
+            setTimeout(() => {
+                const stats = adminReceiver.getStats();
+                console.log('📊 Statut récepteur:', stats);
+            }, 2000);
+        });
+
+        // Ajouter un indicateur de connexion temps réel dans le header
+        const headerTitle = document.querySelector('.header h1');
+        if (headerTitle) {
+            headerTitle.innerHTML += ' <span class="realtime-indicator" title="En ligne - Temps réel actif">🌐</span>';
+        }
     </script>
 </body>
 
