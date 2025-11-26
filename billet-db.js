@@ -2,7 +2,7 @@
 class BilletDB {
   constructor() {
     this.dbName = "BielleterieDB";
-    this.version = 5; // Version avec sync temps réel
+    this.version = 5;
     this.db = null;
     this.isInitialized = false;
     this.initializationPromise = null;
@@ -47,12 +47,7 @@ class BilletDB {
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
-        console.log(
-          "🔄 Mise à jour structure BDD - Version:",
-          event.oldVersion,
-          "→",
-          event.newVersion
-        );
+        console.log("🔄 Mise à jour structure BDD");
 
         // Tables existantes
         if (!db.objectStoreNames.contains("clients")) {
@@ -88,23 +83,6 @@ class BilletDB {
           backupStore.createIndex("timestamp", "timestamp", { unique: false });
         }
 
-        if (!db.objectStoreNames.contains("sync_queue")) {
-          const syncStore = db.createObjectStore("sync_queue", {
-            keyPath: "id",
-            autoIncrement: true,
-          });
-          syncStore.createIndex("timestamp", "timestamp", { unique: false });
-          syncStore.createIndex("processed", "processed", { unique: false });
-        }
-
-        // Nouvelle table pour la synchronisation multi-appareils
-        if (!db.objectStoreNames.contains("devices")) {
-          const devicesStore = db.createObjectStore("devices", {
-            keyPath: "deviceId",
-          });
-          devicesStore.createIndex("lastSeen", "lastSeen", { unique: false });
-        }
-
         console.log("✅ Structure BDD créée avec succès");
       };
 
@@ -123,13 +101,6 @@ class BilletDB {
       this.processSync();
     }, 10000);
 
-    // Synchronisation immédiate quand la page devient visible
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) {
-        this.processSync();
-      }
-    });
-
     console.log("🔄 Système de synchronisation activé");
   }
 
@@ -141,15 +112,12 @@ class BilletDB {
       if (unsyncedClients.length > 0) {
         console.log(`🔄 ${unsyncedClients.length} clients à synchroniser`);
 
-        // Synchroniser avec le serveur/admin (simulation)
+        // Synchroniser avec l'admin
         await this.syncWithAdmin(unsyncedClients);
 
         // Marquer comme synchronisés
         await this.markAsSynced(unsyncedClients);
       }
-
-      // Vérifier les nouvelles données de l'admin
-      await this.checkAdminUpdates();
     } catch (error) {
       console.error("❌ Erreur synchronisation:", error);
     }
@@ -173,10 +141,9 @@ class BilletDB {
   }
 
   async syncWithAdmin(clients) {
-    // SIMULATION: En production, envoyer vers un vrai serveur
     console.log("📤 Envoi des clients à l'admin:", clients.length);
 
-    // Stocker dans localStorage pour la synchronisation cross-onglets
+    // Stocker dans localStorage pour la synchronisation
     const syncData = {
       action: "sync_clients",
       clients: clients,
@@ -192,9 +159,6 @@ class BilletDB {
         detail: { clients: clients },
       })
     );
-
-    // Simuler un délai réseau
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     return true;
   }
@@ -213,33 +177,6 @@ class BilletDB {
     }
 
     console.log(`✅ ${clients.length} clients marqués comme synchronisés`);
-  }
-
-  async checkAdminUpdates() {
-    // Vérifier si l'admin a envoyé des mises à jour
-    const adminUpdate = localStorage.getItem("bielleterie_admin_update");
-
-    if (adminUpdate) {
-      try {
-        const update = JSON.parse(adminUpdate);
-
-        if (update.action === "new_clients" && update.clients) {
-          console.log(
-            "📥 Réception de clients depuis l'admin:",
-            update.clients.length
-          );
-
-          for (const client of update.clients) {
-            await this.saveClient(client);
-          }
-
-          // Supprimer la mise à jour traitée
-          localStorage.removeItem("bielleterie_admin_update");
-        }
-      } catch (error) {
-        console.error("❌ Erreur traitement mise à jour admin:", error);
-      }
-    }
   }
 
   getDeviceId() {
@@ -271,12 +208,6 @@ class BilletDB {
           client.timestamp = new Date().toISOString();
         }
 
-        // Informations de synchronisation
-        client.deviceId = this.getDeviceId();
-        client.synced = false; // Pas encore synchronisé avec l'admin
-        client.syncedAt = null;
-        client.lastUpdated = new Date().toISOString();
-
         const completeClient = {
           id: client.id,
           nom1: client.nom1 || "",
@@ -291,7 +222,6 @@ class BilletDB {
           deviceInfo: this.getDeviceInfo(),
           paiement: client.paiement || "En attente",
           paymentDate: client.paymentDate || null,
-          persistent: true,
           deviceId: this.getDeviceId(),
           synced: false,
           syncedAt: null,
@@ -306,13 +236,10 @@ class BilletDB {
         };
 
         request.onsuccess = () => {
-          console.log(
-            "✅ Client sauvegardé (prêt pour sync):",
-            completeClient.id
-          );
+          console.log("✅ Client sauvegardé:", completeClient.id);
 
           // Synchronisation immédiate
-          this.triggerImmediateSync(completeClient);
+          this.triggerImmediateSync();
 
           // Sauvegardes
           this.createAutoBackup();
@@ -333,8 +260,7 @@ class BilletDB {
     });
   }
 
-  triggerImmediateSync(client) {
-    // Synchronisation immédiate pour les nouveaux clients
+  triggerImmediateSync() {
     setTimeout(() => {
       this.processSync();
     }, 1000);
@@ -457,25 +383,10 @@ class BilletDB {
           console.error("❌ Erreur traitement sync:", error);
         }
       }
-
-      if (event.key === "bielleterie_sync_to_admin" && event.newValue) {
-        try {
-          const syncData = JSON.parse(event.newValue);
-          if (syncData.action === "sync_clients") {
-            console.log("📨 Données sync reçues depuis autre appareil");
-          }
-        } catch (error) {
-          console.error("❌ Erreur traitement sync admin:", error);
-        }
-      }
     });
 
     window.addEventListener("bielleterieDataChanged", (event) => {
-      console.log("🔄 Événement données changées:", event.detail.client.id);
-    });
-
-    window.addEventListener("bielleterieNewClients", (event) => {
-      console.log("🔄 Nouveaux clients détectés:", event.detail.clients.length);
+      console.log("🔄 Données changées:", event.detail.client.id);
     });
 
     console.log("👂 Écouteur synchronisation activé");
@@ -569,6 +480,26 @@ class BilletDB {
     }
   }
 
+  async restoreFromBackupIfNeeded() {
+    try {
+      const clients = await this.getAllClients();
+
+      if (clients.length === 0) {
+        console.log("🔄 Aucun client trouvé, tentative de restauration...");
+
+        const fallbackClients = this.getFallbackClients();
+        if (fallbackClients.length > 0) {
+          console.log("✅ Restauration depuis fallback");
+          for (const client of fallbackClients) {
+            await this.saveClient(client);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("❌ Erreur restauration:", error);
+    }
+  }
+
   // ==================== UTILITAIRES ====================
   generateClientId(type) {
     const prefix = type === "couple" ? "CPL" : "UNI";
@@ -623,6 +554,151 @@ class BilletDB {
     });
   }
 
+  async deleteClient(id) {
+    await this.ensureConnection();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(["clients"], "readwrite");
+      const store = transaction.objectStore("clients");
+      const request = store.delete(id);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(true);
+    });
+  }
+
+  async clearAllData() {
+    await this.ensureConnection();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.clearStore("clients");
+        await this.clearStore("payments");
+        await this.clearStore("backups");
+
+        localStorage.removeItem("bielleterie_clients_fallback");
+        localStorage.removeItem("bielleterie_auto_backup");
+
+        console.log("✅ Toutes les données supprimées");
+        resolve(true);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  async clearStore(storeName) {
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction([storeName], "readwrite");
+      const store = transaction.objectStore(storeName);
+      const request = store.clear();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(true);
+    });
+  }
+
+  async exportToJSON() {
+    await this.ensureConnection();
+    const clients = await this.getAllClients();
+    const payments = await this.getAllPayments();
+
+    return {
+      exportDate: new Date().toISOString(),
+      clients: clients,
+      payments: payments,
+      stats: {
+        totalClients: clients.length,
+        totalPayments: payments.length,
+      },
+    };
+  }
+
+  async importFromJSON(data) {
+    await this.ensureConnection();
+
+    if (!data.clients || !Array.isArray(data.clients)) {
+      throw new Error("Format de données invalide");
+    }
+
+    for (const client of data.clients) {
+      await this.saveClient(client);
+    }
+
+    console.log("📥 Import JSON réussi:", data.clients.length, "clients");
+    return data.clients.length;
+  }
+
+  async createBackup() {
+    await this.ensureConnection();
+    const clients = await this.getAllClients();
+    const payments = await this.getAllPayments();
+
+    const backup = {
+      id: "backup_" + Date.now(),
+      timestamp: new Date().toISOString(),
+      clients: clients,
+      payments: payments,
+      clientCount: clients.length,
+      paymentCount: payments.length,
+    };
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(["backups"], "readwrite");
+      const store = transaction.objectStore("backups");
+      const request = store.put(backup);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        console.log(
+          "💾 Sauvegarde créée:",
+          backup.id,
+          "-",
+          backup.clientCount,
+          "clients"
+        );
+        resolve(backup);
+      };
+    });
+  }
+
+  async getAllBackups() {
+    await this.ensureConnection();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(["backups"], "readonly");
+      const store = transaction.objectStore("backups");
+      const request = store.getAll();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+  }
+
+  async restoreBackup(backupId) {
+    await this.ensureConnection();
+
+    const backup = await new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(["backups"], "readonly");
+      const store = transaction.objectStore("backups");
+      const request = store.get(backupId);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+
+    if (!backup) {
+      throw new Error("Sauvegarde non trouvée");
+    }
+
+    for (const client of backup.clients) {
+      await this.saveClient(client);
+    }
+
+    console.log("🔄 Sauvegarde restaurée:", backup.clientCount, "clients");
+    return backup;
+  }
+
   async diagnostic() {
     try {
       await this.ensureConnection();
@@ -675,17 +751,36 @@ class BilletDB {
     }
   }
 
-  async getAllBackups() {
-    await this.ensureConnection();
+  async resetDatabase() {
+    try {
+      if (this.backupInterval) {
+        clearInterval(this.backupInterval);
+      }
+      if (this.syncInterval) {
+        clearInterval(this.syncInterval);
+      }
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["backups"], "readonly");
-      const store = transaction.objectStore("backups");
-      const request = store.getAll();
+      this.db?.close();
+      this.isInitialized = false;
+      this.db = null;
+      this.initializationPromise = null;
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
+      const request = indexedDB.deleteDatabase(this.dbName);
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          console.log("✅ Base de données supprimée");
+          resolve(true);
+        };
+        request.onerror = () => {
+          console.error("❌ Erreur suppression BDD:", request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error("❌ Erreur réinitialisation:", error);
+      throw error;
+    }
   }
 }
 
