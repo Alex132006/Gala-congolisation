@@ -543,7 +543,7 @@
                 // Configuration EmailJS POUR VOTRE EMAIL
                 this.emailjsConfig = {
                     serviceId: 'service_ckpdrn7', // Votre Service ID EmailJS
-                    templateId: 'template_kkpxfs4', // Votre Template ID EmailJS
+                    templateId: 'template_5ddykem', // Votre Template ID EmailJS
                     publicKey: 'ap0Ki_0sjm3K8LkR8', // Votre Public Key EmailJS
                     toEmail: 'essongapea.a.b@gmail.com' // VOTRE EMAIL - les données arriveront ici
                 };
@@ -989,7 +989,7 @@
                             Type: Single
                             Montant: ${this.amount} FCFA
                             Date: ${new Date().toLocaleDateString('fr-FR')}
-                            Statut: ${status === 'success' ? 'PAYÉ' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC'}
+                            Statut: ${status === 'success' ? 'En cours' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC'}
                             Méthode: ${bank}
                             Référence: ${clientData.id}
                         `
