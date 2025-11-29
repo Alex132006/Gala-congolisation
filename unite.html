@@ -41,7 +41,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url(image\ copy\ 2.png);
+            background-image: url(image\ copy\ 2.jpg);
             background-size: cover;
             background-position: center;
             filter: blur(2px) brightness(0.8);
@@ -759,7 +759,7 @@
                         client_email: clientData.email,
                         client_phone: clientData.phone,
                         billet_type: 'Single',
-                        amount: this.amount + ' FCFA',
+                        amount: this.amount + ' ₽',
                         date_inscription: new Date().toLocaleDateString('fr-FR'),
                         timestamp: clientData.timestamp,
                         payment_status: 'En attente',
@@ -775,7 +775,7 @@
                             
                             🎫 INFORMATIONS BILLET:
                             Type: Single
-                            Montant: ${this.amount} FCFA
+                            Montant: ${this.amount} ₽
                             Date: ${new Date().toLocaleDateString('fr-FR')}
                             Référence: ${clientData.id}
                             
@@ -970,14 +970,14 @@
                         client_email: clientData.email,
                         client_phone: clientData.phone,
                         billet_type: 'Single',
-                        amount: this.amount + ' FCFA',
+                        amount: this.amount + ' ₽',
                         payment_status: status === 'success' ? 'PAYÉ' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC',
                         payment_date: new Date().toLocaleDateString('fr-FR'),
                         bank_method: bank,
                         reference: clientData.id,
-                        subject: `PAIEMENT ${status === 'success' ? 'RÉUSSI' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHOUÉ'} - ${clientData.nom1}`,
+                        subject: `PAIEMENT ${status === 'success' ? '◌ En cours' : status === 'cancelled' ? 'ANNULÉ' : '◌ En cours'} - ${clientData.nom1}`,
                         message: `
-                            STATUT DE PAIEMENT: ${status === 'success' ? '✅ PAYÉ' : status === 'cancelled' ? '🟡 ANNULÉ' : '❌ ÉCHEC'}
+                            STATUT DE PAIEMENT: ${status === 'success' ? '◌ En cours' : status === 'cancelled' ? '🟡 ANNULÉ' : '◌ En cours'}
                             BANQUE: ${bank}
                             
                             📋 INFORMATIONS CLIENT:
@@ -987,9 +987,9 @@
                             
                             💳 INFORMATIONS PAIEMENT:
                             Type: Single
-                            Montant: ${this.amount} FCFA
+                            Montant: ${this.amount} ₽
                             Date: ${new Date().toLocaleDateString('fr-FR')}
-                            Statut: ${status === 'success' ? 'En cours' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC'}
+                            Statut: ${status === 'success' ? 'En cours sur Sberbank' : status === 'cancelled' ? 'Non abouti' : 'En cours sur tinkoff'}
                             Méthode: ${bank}
                             Référence: ${clientData.id}
                         `

@@ -36,7 +36,7 @@ app.post("/send-inscription", async (req, res) => {
             ${nom2 ? `<p><strong>Nom 2:</strong> ${nom2}</p>` : ""}
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Téléphone:</strong> ${phone}</p>
-            <p><strong>Montant:</strong> ${amount} FCFA</p>
+            <p><strong>Montant:</strong> ${amount} ₽</p>
             <p><strong>Date:</strong> ${new Date().toLocaleString("fr-FR")}</p>
           </div>
         </div>

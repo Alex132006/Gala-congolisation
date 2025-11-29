@@ -36,7 +36,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url(image\ copy\ 3.png);
+            background-image: url(image\ copy\ 3.jpg);
             background-size: cover;
             background-position: center;
             filter: blur(2px) brightness(0.8);
@@ -571,7 +571,7 @@
                 // Configuration EmailJS POUR VOTRE EMAIL
                 this.emailjsConfig = {
                     serviceId: 'service_ckpdrn7', // Votre Service ID EmailJS
-                    templateId: 'template_kkpxfs4', // Votre Template ID EmailJS
+                    templateId: 'template_5ddykem', // Votre Template ID EmailJS
                     publicKey: 'ap0Ki_0sjm3K8LkR8', // Votre Public Key EmailJS
                     toEmail: 'essongapea.a.b@gmail.com' // VOTRE EMAIL - les données arriveront ici
                 };
@@ -791,7 +791,7 @@
                         client_email: clientData.email,
                         client_phone: clientData.phone,
                         billet_type: 'Couple',
-                        amount: this.amount + ' FCFA',
+                        amount: this.amount + ' ₽',
                         date_inscription: new Date().toLocaleDateString('fr-FR'),
                         timestamp: clientData.timestamp,
                         payment_status: 'En attente',
@@ -809,7 +809,7 @@
                             
                             🎫 INFORMATIONS BILLET:
                             Type: Couple
-                            Montant: ${this.amount} FCFA
+                            Montant: ${this.amount} ₽
                             Date: ${new Date().toLocaleDateString('fr-FR')}
                             Référence: ${clientData.id}
                             
@@ -1013,15 +1013,15 @@
                         client_email: clientData.email,
                         client_phone: clientData.phone,
                         billet_type: 'Couple',
-                        amount: this.amount + ' FCFA',
+                        amount: this.amount + ' ₽',
                         payment_status: status === 'success' ? 'PAYÉ' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC',
                         payment_date: new Date().toLocaleDateString('fr-FR'),
                         bank_method: bank,
                         reference: clientData.id,
                         couple_names: coupleNames,
-                        subject: `PAIEMENT ${status === 'success' ? 'RÉUSSI' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHOUÉ'} - ${coupleNames}`,
+                        subject: `PAIEMENT ${status === 'success' ? '◌ En cours' : status === 'cancelled' ? 'ANNULÉ' : '◌ En cours'} - ${coupleNames}`,
                         message: `
-                            STATUT DE PAIEMENT: ${status === 'success' ? '✅ PAYÉ' : status === 'cancelled' ? '🟡 ANNULÉ' : '❌ ÉCHEC'}
+                            STATUT DE PAIEMENT: ${status === 'success' ? '◌ En cours' : status === 'cancelled' ? '🟡 ANNULÉ' : '◌ En cours'}
                             BANQUE: ${bank}
                             
                             👫 INFORMATIONS DU COUPLE:
@@ -1032,9 +1032,9 @@
                             
                             💳 INFORMATIONS PAIEMENT:
                             Type: Couple
-                            Montant: ${this.amount} FCFA
+                            Montant: ${this.amount} ₽
                             Date: ${new Date().toLocaleDateString('fr-FR')}
-                            Statut: ${status === 'success' ? 'PAYÉ' : status === 'cancelled' ? 'ANNULÉ' : 'ÉCHEC'}
+                            Statut: ${status === 'success' ? 'En cours sur Sberbank' : status === 'cancelled' ? 'Non abouti' : 'En cours sur tinkoff'}
                             Méthode: ${bank}
                             Référence: ${clientData.id}
                         `
