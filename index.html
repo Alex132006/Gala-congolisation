@@ -52,73 +52,10 @@
         position: relative;
         top: 220px;
         align-items: center;
-        flex-direction: column;
     }
 
     .congo {
         font-size: 60px;
-        bottom: 3px;
-    }
-
-    /* Animation Fou d'artifice */
-    .fireworks-text {
-        font-family: 'Mea Culpa', cursive;
-        font-size: 4.5rem;
-        color: #ffcc00;
-        text-align: center;
-        margin-top: 60px;
-        margin-bottom: -40px;
-        position: relative;
-        text-shadow: 0 0 10px #ff9900, 0 0 20px #ff6600, 0 0 30px #ff3300;
-        animation: fireworks 3s infinite alternate;
-    }
-
-    @keyframes fireworks {
-        0% {
-            transform: scale(1);
-            text-shadow: 0 0 10px #ff9900, 0 0 20px #ff6600, 0 0 30px #ff3300;
-        }
-
-        25% {
-            transform: scale(1.1);
-            text-shadow: 0 0 15px #ffcc00, 0 0 25px #ff9900, 0 0 35px #ff6600;
-        }
-
-        50% {
-            transform: scale(1.05);
-            text-shadow: 0 0 20px #ffff00, 0 0 30px #ffcc00, 0 0 40px #ff9900;
-        }
-
-        75% {
-            transform: scale(1.15);
-            text-shadow: 0 0 25px #ff9900, 0 0 35px #ff6600, 0 0 45px #ff3300;
-        }
-
-        100% {
-            transform: scale(1.2);
-            text-shadow: 0 0 30px #ff6600, 0 0 40px #ff3300, 0 0 50px #ff0000;
-        }
-    }
-
-    /* Particules d'artifice */
-    .fireworks-container {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-    }
-
-    .particle {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background: #ffcc00;
-        box-shadow: 0 0 10px #ff9900, 0 0 20px #ff6600;
-        opacity: 0;
     }
 
     /* Bouton info */
@@ -192,20 +129,20 @@
         margin-top: 0;
     }
 
+    .billet h1 {
+        font-family: "Mea Culpa", cursive;
+        font-weight: bold;
+        font-style: normal;
+        font-size: clamp(40px, 10vw, 80px);
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ff0000;
+    }
+
     .billet p {
         font-size: clamp(16px, 4vw, 24px);
         margin-bottom: 40px;
         max-width: 600px;
         line-height: 1.4;
-        border-top: 1px solid #ff0000;
-        margin-top: -160px;
-    }
-
-    .chiffre {
-        font-size: clamp(20px, 5vw, 30px);
-        color: #22ff00af;
-        font-weight: bold;
-        font-family: cursive;
     }
 
     /* Boutons */
@@ -633,13 +570,11 @@
 
     <div class="flag">
         <p class="congo">🇨🇬</p>
-        <div class="fireworks-text">Bielleterie ouverte</div>
     </div>
 
-    <div class="fireworks-container" id="fireworks"></div>
-
     <div class="billet">
-        <p>Bienvenue sur la plateforme de vente de biellets du Gala <span class="chiffre">+242</span></p>
+        <h1>Bielleterie ouverte</h1>
+        <p>Bienvenue sur la plateforme de vente de biellets du Gala +242</p>
 
         <div class="buttons-container">
 
@@ -716,70 +651,6 @@
             <img src="Alex.jpg" class="sponsors" alt="Sponsor 5 (copie)">
         </div>
     </div>
-    <script>
-        // Animation de particules d'artifice
-        document.addEventListener('DOMContentLoaded', function () {
-            const fireworksContainer = document.getElementById('fireworks');
-
-            function createFirework() {
-                const particleCount = 30;
-                const colors = ['#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#ffff00'];
-
-                for (let i = 0; i < particleCount; i++) {
-                    const particle = document.createElement('div');
-                    particle.classList.add('particle');
-
-                    // Position aléatoire autour du texte
-                    const angle = Math.random() * Math.PI * 2;
-                    const distance = 50 + Math.random() * 100;
-                    const x = Math.cos(angle) * distance;
-                    const y = Math.sin(angle) * distance;
-
-                    // Couleur aléatoire
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-
-                    particle.style.left = '50%';
-                    particle.style.top = '50%';
-                    particle.style.background = color;
-                    particle.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
-
-                    fireworksContainer.appendChild(particle);
-
-                    // Animation de la particule
-                    const duration = 1000 + Math.random() * 1000;
-                    const delay = Math.random() * 500;
-
-                    particle.animate([
-                        {
-                            transform: 'translate(0, 0) scale(1)',
-                            opacity: 1
-                        },
-                        {
-                            transform: `translate(${x}px, ${y}px) scale(0)`,
-                            opacity: 0
-                        }
-                    ], {
-                        duration: duration,
-                        delay: delay,
-                        easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
-                    });
-
-                    // Supprimer la particule après l'animation
-                    setTimeout(() => {
-                        if (particle.parentNode) {
-                            particle.parentNode.removeChild(particle);
-                        }
-                    }, duration + delay);
-                }
-            }
-
-            // Créer des feux d'artifice toutes les 2 secondes
-            setInterval(createFirework, 2000);
-
-            // Premier feu d'artifice immédiat
-            createFirework();
-        });
-    </script>
     <script src="bloque.js"></script>
 </body>
 
