@@ -111,7 +111,7 @@
     }
 
     .billet h1 {
-        font-family: cursive;
+        /* font-family: "Mea Culpa", cursive; */
         font-weight: bold;
         font-style: normal;
         font-size: clamp(40px, 10vw, 80px);
